@@ -742,9 +742,6 @@
                         <button type="button" class="btn btn-info" id="loadFileBtn">
                             <span>📥</span> Cargar Reporte
                         </button>
-                        <button type="button" class="btn btn-success" id="saveBtn">
-                            <span>💾</span> Guardar Reporte
-                        </button>
                         <button type="button" class="btn btn-primary" id="printBtn">
                             <span>📄</span> Descargar PDF
                         </button>
@@ -766,6 +763,26 @@
     <!-- Input oculto para cargar archivos -->
     <input type="file" id="fileInput" accept=".json" style="display: none;">
 
+    <!-- Modal de confirmación -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-icon">📄</div>
+            <h2 class="modal-title">¿Descargar y Guardar Reporte?</h2>
+            <p class="modal-message">
+                Se descargará el PDF y los datos del paciente se guardarán en la base de datos de forma segura.
+            </p>
+            <div class="modal-loading">
+                <div class="spinner"></div>
+                <p style="color: #7f8c8d;">Guardando datos...</p>
+            </div>
+            <div class="modal-buttons">
+                <button id="modalCancel" class="modal-btn modal-btn-cancel">Cancelar</button>
+                <button id="modalConfirm" class="modal-btn modal-btn-confirm">Sí, Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="supabase-config.js"></script>
     <script src="data.js"></script>
     <script src="script.js"></script>
 </body>

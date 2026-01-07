@@ -592,7 +592,56 @@ class ReporteMedico {
         return formData;
     }
 
-    printReport() {
+    async guardarEnDB() {
+        try {
+            // Verificar que Supabase esté configurado
+            if (!window.supabase || !window.supabase.apiKey) {
+                console.warn('Supabase no configurado, saltando guardado en DB');
+                return;
+            }
+
+            const nombre = document.getElementById('nombre').value.trim();
+            const apellido = document.getElementById('apellido')?.value.trim() || '';
+            const cedula = document.getElementById('cc').value.trim();
+
+            if (!cedula) {
+                console.warn('No hay cédula, no se puede guardar en DB');
+                return;
+            }
+
+            // Obtener todos los datos del formulario
+            const reporteData = this.collectFormData();
+
+            // Preparar datos para Supabase
+            const dataToSave = {
+                cedula: cedula,
+                nombre: nombre,
+                apellido: apellido,
+                reporte_json: reporteData,
+                fecha_modificacion: new Date().toISOString()
+            };
+
+            // Verificar si ya existe un reporte con esta cédula
+            const existente = await window.supabase.getReporteByCedula(cedula);
+
+            if (existente) {
+                // Actualizar reporte existente
+                await window.supabase.updateReporte(cedula, dataToSave);
+                console.log('Reporte actualizado en DB');
+            } else {
+                // Crear nuevo reporte
+                dataToSave.fecha_creacion = new Date().toISOString();
+                await window.supabase.saveReporte(dataToSave);
+                console.log('Reporte guardado en DB');
+            }
+
+        } catch (error) {
+            console.error('Error guardando en DB:', error);
+            // No mostramos error al usuario, solo log
+        }
+    }
+
+    async printReport() {
         console.log('printReport() llamado');
         
         if (!document.getElementById('nombre')?.value.trim()) {
@@ -600,11 +649,46 @@ class ReporteMedico {
             return;
         }
 
+        // Mostrar modal de confirmación moderno
+        this.showConfirmModal();
+    }
+
+    showConfirmModal() {
+        const modal = document.getElementById('confirmModal');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalConfirm = document.getElementById('modalConfirm');
+        
+        modal.classList.add('active');
+        
+        // Remover listeners previos
+        const newModalCancel = modalCancel.cloneNode(true);
+        const newModalConfirm = modalConfirm.cloneNode(true);
+        modalCancel.parentNode.replaceChild(newModalCancel, modalCancel);
+        modalConfirm.parentNode.replaceChild(newModalConfirm, modalConfirm);
+        
+        // Cancelar
+        newModalCancel.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        
+        // Confirmar
+        newModalConfirm.addEventListener('click', async () => {
+            // Deshabilitar botones
+            newModalConfirm.disabled = true;
+            newModalCancel.disabled = true;
+            
+            // Mostrar loading
+            document.querySelector('.modal-loading').classList.add('active');
+            document.querySelector('.modal-buttons').style.display = 'none';
+            
+            await this.generateAndSavePDF();
+        });
+    }
+
+    async generateAndSavePDF() {
         const nombrePaciente = document.getElementById('nombre').value.trim();
         const apellidoPaciente = document.getElementById('apellido')?.value.trim() || '';
         const filename = `Reporte_${nombrePaciente}_${apellidoPaciente}_${new Date().getTime()}.pdf`;
-
-        this.showAlert('⏳ Generando PDF, por favor espera...', 'info');
 
         try {
             if (!window.jspdf) {
@@ -1400,10 +1484,27 @@ class ReporteMedico {
             }
 
             doc.save(filename);
-            this.showAlert('✓ PDF descargado correctamente', 'success');
+            
+            // Guardar en base de datos
+            await this.guardarEnDB();
+            
+            // Cerrar modal
+            document.getElementById('confirmModal').classList.remove('active');
+            
+            // Mostrar mensaje de éxito
+            this.showAlert('✓ PDF descargado y datos guardados correctamente', 'success');
+            
+            // Redirigir a la página de bienvenida después de 2 segundos
+            setTimeout(() => {
+                window.location.href = 'bienvenida.html';
+            }, 2000);
 
         } catch (error) {
-            console.error('Error en printReport:', error);
+            console.error('Error en generateAndSavePDF:', error);
+            
+            // Cerrar modal
+            document.getElementById('confirmModal').classList.remove('active');
+            
             this.showAlert('Error al generar PDF: ' + error.message, 'error');
         }
     }
