@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Médico - Sistema</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #003A5D 0%, #00C8D4 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .home-container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 58, 93, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #003A5D 0%, #005073 100%);
+            color: white;
+            padding: 50px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .info-box {
+            background: #F7FBFD;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #00C8D4;
+            margin-bottom: 30px;
+            color: #666666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 16px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-new {
+            background: linear-gradient(135deg, #00C8D4 0%, #00a8c4 100%);
+            color: white;
+        }
+
+        .btn-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 200, 212, 0.3);
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #003A5D 0%, #005073 100%);
+            color: white;
+        }
+
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 58, 93, 0.3);
+        }
+
+        .footer {
+            background: #F7FBFD;
+            padding: 20px;
+            text-align: center;
+            color: #999999;
+            font-size: 12px;
+            border-top: 1px solid #E8F4F8;
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 40px 20px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+
+            .btn {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="home-container">
+        <div class="header">
+            <h1>Reporte Médico</h1>
+            <p>Sistema de Gestión de Reportes</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                Selecciona una opción para continuar. Todos tus reportes se guardan automáticamente en el sistema.
+            </div>
+
+            <div class="buttons">
+                <a href="index.html" class="btn btn-new">
+                    ➕ Generar un Nuevo Reporte
+                </a>
+                <a href="reportes.html" class="btn btn-view">
+                    📋 Ver Reportes Anteriores
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© KinetiqSports - Reporte Médico Digital</p>
+        </div>
+    </div>
+</body>
+</html>

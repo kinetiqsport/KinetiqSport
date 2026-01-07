@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Reportes - Reporte Médico</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .reports-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .reports-header {
+            background: linear-gradient(135deg, #003A5D 0%, #005073 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .reports-header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .reports-header button {
+            background: white;
+            color: #003A5D;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .reports-header button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+        }
+
+        .reports-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .report-card {
+            background: white;
+            border: 1px solid #E8F4F8;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .report-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0, 200, 212, 0.2);
+            border-color: #00C8D4;
+        }
+
+        .report-card h3 {
+            color: #003A5D;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 18px;
+            word-break: break-word;
+        }
+
+        .report-info {
+            color: #666666;
+            font-size: 13px;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .report-info strong {
+            color: #003A5D;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            flex: 1;
+            min-width: 80px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #00C8D4 0%, #00a8c4 100%);
+            color: white;
+        }
+
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 200, 212, 0.3);
+        }
+
+        .btn-delete {
+            background: #FFE5E5;
+            color: #C41E3A;
+        }
+
+        .btn-delete:hover {
+            background: #FFB3B3;
+        }
+
+        .empty-state {
+            background: #F7FBFD;
+            padding: 40px;
+            border-radius: 8px;
+            text-align: center;
+            color: #666666;
+            margin-bottom: 30px;
+        }
+
+        .empty-state h2 {
+            color: #003A5D;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-home {
+            background: #003A5D;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-home:hover {
+            background: #005073;
+            transform: translateY(-2px);
+        }
+
+        .btn-new {
+            background: linear-gradient(135deg, #00C8D4 0%, #00a8c4 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 200, 212, 0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h2 {
+            color: #003A5D;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            color: #666666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-confirm {
+            background: #C41E3A;
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background: #A01A2E;
+        }
+
+        .btn-cancel {
+            background: #E0E0E0;
+            color: #333333;
+        }
+
+        .btn-cancel:hover {
+            background: #D0D0D0;
+        }
+
+        @media (max-width: 768px) {
+            .reports-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .reports-header h1 {
+                width: 100%;
+            }
+
+            .reports-header button {
+                width: 100%;
+            }
+
+            .reports-list {
+                grid-template-columns: 1fr;
+            }
+
+            .report-actions {
+                gap: 8px;
+            }
+
+            .btn-action {
+                flex: 1;
+                min-width: 60px;
+                padding: 8px 10px;
+                font-size: 11px;
+            }
+
+            .nav-buttons {
+                width: 100%;
+            }
+
+            .btn-home, .btn-new {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="reports-container">
+        <div class="reports-header">
+            <h1>📋 Mis Reportes</h1>
+            <div class="nav-buttons">
+                <a href="bienvenida.html" class="btn-home">← Volver al Inicio</a>
+                <a href="index.html" class="btn-new">➕ Nuevo Reporte</a>
+            </div>
+        </div>
+
+        <div id="reportsList" class="reports-list"></div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <h2>📭 Sin reportes guardados</h2>
+            <p>Aún no tienes reportes guardados. Crea uno nuevo para comenzar.</p>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación de eliminar -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h2>Confirmar eliminación</h2>
+            <p id="deleteMessage">¿Estás seguro de que deseas eliminar este reporte?</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeDeleteModal()">Cancelar</button>
+                <button class="btn-confirm" onclick="confirmDelete()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let reportIdToDelete = null;
+        let allReports = [];
+
+        // Cargar reportes al abrir la página
+        document.addEventListener('DOMContentLoaded', loadReports);
+
+        function loadReports() {
+            const reportsList = document.getElementById('reportsList');
+            const emptyState = document.getElementById('emptyState');
+            reportsList.innerHTML = '';
+            allReports = [];
+
+            // Obtener todos los reportes del localStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('reporte_')) {
+                    try {
+                        const reportData = JSON.parse(localStorage.getItem(key));
+                        allReports.push({
+                            id: key,
+                            ...reportData
+                        });
+                    } catch (e) {
+                        console.error('Error parsing report:', key, e);
+                    }
+                }
+            }
+
+            // Ordenar por fecha más reciente primero
+            allReports.sort((a, b) => {
+                const dateA = new Date(a.fechaCreacion || 0);
+                const dateB = new Date(b.fechaCreacion || 0);
+                return dateB - dateA;
+            });
+
+            if (allReports.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            // Crear tarjetas para cada reporte
+            allReports.forEach((report, index) => {
+                const card = document.createElement('div');
+                card.className = 'report-card';
+                
+                const paciente = report.nombrePaciente || 'Sin nombre';
+                const fecha = new Date(report.fechaCreacion || new Date()).toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                const hora = new Date(report.fechaCreacion || new Date()).toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                card.innerHTML = `
+                    <h3>👤 ${paciente}</h3>
+                    <div class="report-info">
+                        <div><strong>Fecha:</strong> ${fecha} ${hora}</div>
+                        <div><strong>Edad:</strong> ${report.edad || 'No especificada'} años</div>
+                        <div><strong>IMC:</strong> ${report.imc || 'No calculado'}</div>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn-action btn-view" onclick="viewReport('${report.id}')">👁️ Ver</button>
+                        <button class="btn-action btn-delete" onclick="showDeleteModal('${report.id}', '${paciente}')">🗑️ Eliminar</button>
+                    </div>
+                `;
+                reportsList.appendChild(card);
+            });
+        }
+
+        function viewReport(reportId) {
+            try {
+                const reportData = JSON.parse(localStorage.getItem(reportId));
+                // Guardar en sessionStorage para que index.html lo cargue
+                sessionStorage.setItem('reportToLoad', JSON.stringify(reportData));
+                // Abrir index.html
+                window.location.href = 'index.html';
+            } catch (e) {
+                alert('Error al cargar el reporte: ' + e.message);
+            }
+        }
+
+        function showDeleteModal(reportId, paciente) {
+            reportIdToDelete = reportId;
+            document.getElementById('deleteMessage').textContent = 
+                `¿Estás seguro de que deseas eliminar el reporte de ${paciente}? Esta acción no se puede deshacer.`;
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            reportIdToDelete = null;
+        }
+
+        function confirmDelete() {
+            if (reportIdToDelete) {
+                localStorage.removeItem(reportIdToDelete);
+                closeDeleteModal();
+                loadReports();
+            }
+        }
+
+        // Cerrar modal al hacer clic afuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('deleteModal');
+            if (event.target === modal) {
+                closeDeleteModal();
+            }
+        }
+    </script>
+</body>
+</html>

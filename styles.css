@@ -1,0 +1,813 @@
+/* =========================================================================
+   REPORTE MÉDICO - ESTILOS CSS MODERNOS Y PROFESIONALES
+   Colores corporativos: Azul oscuro #003A5D, Turquesa #00C8D4
+   ========================================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Variables CSS para fácil mantenimiento */
+:root {
+    --primary-color: #0F4C81;      /* Azul profundo moderno */
+    --secondary-color: #00B8D4;    /* Cyan vibrante moderno */
+    --light-bg: #F5F8FA;           /* Fondo azul muy suave moderno */
+    --header-light: #E8F2F8;       /* Azul claro para headers */
+    --border-color: #E0E4E8;       /* Gris sutil moderno */
+    --border-light: #D9E1E8;       /* Gris claro para bordes suaves */
+    --text-primary: #212121;       /* Texto oscuro moderno */
+    --text-secondary: #757575;     /* Texto gris moderno */
+    --success-color: #28A745;
+    --warning-color: #FFC107;
+    --danger-color: #DC3545;
+    --info-color: #17A2B8;
+    --white: #FFFFFF;
+    
+    --font-primary: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    --border-radius: 6px;
+    --shadow: 0 2px 8px rgba(0, 58, 93, 0.1);
+    --shadow-hover: 0 4px 16px rgba(0, 58, 93, 0.15);
+}
+
+/* =========================================================================
+   TIPOGRAFÍA Y ESTILOS BASE
+   ========================================================================= */
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-primary);
+    color: var(--text-primary);
+    background: linear-gradient(135deg, #f5f8fa 0%, #e8eef5 100%);
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================================================
+   HEADER / ENCABEZADO
+   ========================================================================= */
+
+.header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0A3A68 100%);
+    color: var(--white);
+    padding: 40px 30px;
+    margin-bottom: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-hover);
+    position: relative;
+    overflow: hidden;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: var(--secondary-color);
+    opacity: 0.1;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.header-content {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 30px;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    padding: 12px 18px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.logo {
+    max-width: 140px;
+    height: auto;
+    display: block;
+}
+
+.title-section {
+    text-align: left;
+}
+
+.main-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+}
+
+.date-section {
+    text-align: right;
+}
+
+.report-date {
+    font-size: 14px;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+/* =========================================================================
+   CONTENIDO PRINCIPAL
+   ========================================================================= */
+
+.main-content {
+    flex: 1;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+/* =========================================================================
+   SECCIONES
+   ========================================================================= */
+
+.section {
+    animation: slideIn 0.4s ease-out;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.section > div:not(.section-header) {
+    padding: 24px;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.section-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0A3A68 100%);
+    color: var(--white);
+    padding: 18px 24px;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    margin-bottom: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.section-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--secondary-color);
+}
+
+.section-header h2 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 0.5px;
+    padding-left: 10px;
+}
+
+.section-content {
+    padding: 24px;
+}
+
+/* =========================================================================
+   FORMULARIOS Y CONTROLES
+   ========================================================================= */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--primary-color);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+}
+
+.form-control {
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-family: var(--font-primary);
+    font-size: 13px;
+    transition: all 0.3s ease;
+    background: var(--white);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(0, 184, 212, 0.1);
+    background: var(--white);
+}
+
+.form-control:hover {
+    border-color: var(--border-color);
+}
+
+.form-control[readonly] {
+    background: var(--light-bg);
+    cursor: not-allowed;
+    color: var(--text-secondary);
+}
+
+.form-control.error {
+    border-color: var(--danger-color);
+    background: rgba(220, 53, 69, 0.05);
+}
+
+/* Estilos para validaciones */
+.input-error {
+    border-color: #ff6b6b !important;
+    background: rgba(255, 107, 107, 0.08) !important;
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.error-message {
+    color: #ff4757;
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+    font-weight: 500;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+textarea.form-control {
+    font-family: var(--font-primary);
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.5;
+}
+
+/* =========================================================================
+   LAYOUTS DE FORMULARIOS
+   ========================================================================= */
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.form-grid-2:last-of-type {
+    margin-bottom: 0;
+}
+
+.form-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.form-grid-4:last-of-type {
+    margin-bottom: 0;
+}
+
+.antecedents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    padding: 24px;
+    background: transparent;
+    border-radius: var(--border-radius);
+}
+
+/* =========================================================================
+   TABLAS DE DATOS
+   ========================================================================= */
+
+.table-responsive {
+    overflow-x: auto;
+    margin: 24px 0;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-light);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+    font-size: 13px;
+}
+
+.data-table thead {
+    background: linear-gradient(135deg, #E8F2F8 0%, #D9E8F4 100%);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.data-table th {
+    padding: 16px 12px;
+    text-align: left;
+    font-weight: 700;
+    color: var(--primary-color);
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid var(--border-light);
+    transition: background-color 0.2s ease;
+}
+
+.data-table tbody tr:hover {
+    background: var(--light-bg);
+}
+
+.data-table tbody tr:nth-child(even) {
+    background: rgba(0, 58, 93, 0.02);
+}
+
+.data-table td {
+    padding: 14px 12px;
+    color: var(--text-primary);
+}
+
+.data-table td strong {
+    color: var(--primary-color);
+    min-width: 60px;
+    display: inline-block;
+}
+
+/* Tabla limpia sin fondos alternados */
+.data-table.clean-table tbody tr {
+    background: var(--white);
+}
+
+.data-table.clean-table tbody tr:nth-child(even) {
+    background: var(--white);
+}
+
+.salto-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    font-size: 12px;
+    text-align: center;
+    font-family: "Courier New", monospace;
+}
+
+.salto-input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: inset 0 0 0 2px rgba(0, 200, 212, 0.1);
+}
+
+/* Inputs de tabla Equilibrio Unipodal - mismo estilo que salto-input */
+.unipodal-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    font-size: 12px;
+    text-align: center;
+    font-family: "Courier New", monospace;
+}
+
+.unipodal-input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: inset 0 0 0 2px rgba(0, 200, 212, 0.1);
+}
+
+/* =========================================================================
+   BOTONES
+   ========================================================================= */
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 30px 0;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, #009BA8 100%);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #00D0E0 0%, #00C8D4 100%);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: var(--white);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #7a8287 0%, #646f77 100%);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+    color: var(--white);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #32d054 0%, #29d8a6 100%);
+}
+
+.btn-info {
+    background: linear-gradient(135deg, var(--info-color) 0%, #13c2c2 100%);
+    color: var(--white);
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #20b2aa 0%, #1ad2d2 100%);
+}
+
+/* =========================================================================
+   SECCIÓN DE ACCIONES
+   ========================================================================= */
+
+.action-section {
+    background: var(--light-bg);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    border-top: 2px solid var(--secondary-color);
+    margin-top: 40px;
+}
+
+/* =========================================================================
+   FOOTER
+   ========================================================================= */
+
+.footer {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0A3A68 100%);
+    color: var(--white);
+    text-align: center;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    font-size: 12px;
+    opacity: 0.9;
+    margin-top: auto;
+}
+
+/* =========================================================================
+   NOTIFICACIONES Y ALERTS
+   ========================================================================= */
+
+.alert {
+    padding: 16px 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    display: none;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert.show {
+    display: block;
+}
+
+.alert-success {
+    background: rgba(40, 167, 69, 0.1);
+    color: #155724;
+    border-left: 4px solid var(--success-color);
+}
+
+.alert-error {
+    background: rgba(220, 53, 69, 0.1);
+    color: #721c24;
+    border-left: 4px solid var(--danger-color);
+}
+
+.alert-info {
+    background: rgba(23, 162, 184, 0.1);
+    color: #0c5460;
+    border-left: 4px solid var(--info-color);
+}
+
+/* =========================================================================
+   UTILIDADES Y ESTADOS
+   ========================================================================= */
+
+.text-muted {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.required::after {
+    content: ' *';
+    color: var(--danger-color);
+    font-weight: 700;
+}
+
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* =========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================= */
+
+@media (max-width: 1024px) {
+    .main-content {
+        padding: 30px;
+    }
+
+    .header-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .logo-section,
+    .title-section,
+    .date-section {
+        text-align: center;
+    }
+
+    .main-title {
+        font-size: 26px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 12px;
+    }
+
+    .main-content {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .header {
+        padding: 30px 20px;
+        margin-bottom: 20px;
+    }
+
+    .main-title {
+        font-size: 22px;
+    }
+
+    .form-grid-2,
+    .form-grid-4,
+    .antecedents-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .button-group {
+        gap: 8px;
+        padding: 20px 0;
+    }
+
+    .btn {
+        flex: 1;
+        min-width: 140px;
+        padding: 10px 16px;
+        font-size: 12px;
+    }
+
+    .section-header h2 {
+        font-size: 16px;
+    }
+
+    .data-table {
+        font-size: 12px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 10px 8px;
+    }
+
+    .salto-input {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+    }
+
+    .main-content {
+        padding: 16px;
+    }
+
+    .header {
+        padding: 20px 16px;
+    }
+
+    .header-content {
+        gap: 16px;
+    }
+
+    .logo {
+        max-width: 80px;
+    }
+
+    .main-title {
+        font-size: 18px;
+    }
+
+    .subtitle {
+        font-size: 12px;
+    }
+
+    .form-group label {
+        font-size: 12px;
+    }
+
+    .form-control {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    textarea.form-control {
+        min-height: 60px;
+    }
+
+    .section-header h2 {
+        font-size: 14px;
+    }
+
+    .button-group {
+        gap: 6px;
+        padding: 16px 0;
+    }
+
+    .btn {
+        flex: 1;
+        min-width: 100px;
+        padding: 8px 12px;
+        font-size: 11px;
+        gap: 4px;
+    }
+
+    .btn span {
+        display: none;
+    }
+
+    .data-table {
+        font-size: 11px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 8px 6px;
+    }
+}
+
+/* =========================================================================
+   MODO IMPRESIÓN
+   ========================================================================= */
+
+@media print {
+    body {
+        background: var(--white);
+        font-size: 11px;
+    }
+
+    .container {
+        padding: 0;
+        max-width: 100%;
+    }
+
+    .header {
+        box-shadow: none;
+        page-break-after: avoid;
+    }
+
+    .main-content {
+        box-shadow: none;
+        padding: 0;
+        background: var(--white);
+    }
+
+    .button-group,
+    .action-section,
+    .footer {
+        display: none;
+    }
+
+    .section {
+        page-break-inside: avoid;
+        margin-bottom: 12px;
+    }
+
+    .form-control {
+        border: 1px solid #999;
+        background: var(--white);
+    }
+
+    .data-table {
+        font-size: 10px;
+    }
+
+    .btn {
+        display: none;
+    }
+}
