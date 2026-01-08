@@ -1,0 +1,42 @@
+name: Deploy with Secrets
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Inject secrets into config
+      run: |
+        cat > web/supabase-secrets.js << EOF
+        // Inyectado automáticamente por GitHub Actions
+        window.SUPABASE_ANON_KEY = '${{ secrets.SUPABASE_ANON_KEY }}';
+        EOF
+        
+        cat > web/google-auth-config.js << EOF
+        // Configuración de Google OAuth
+        // Inyectada automáticamente por GitHub Actions
+        window.GOOGLE_CLIENT_ID = '${{ secrets.GOOGLE_CLIENT_ID }}';
+        console.log('Google Auth Config loaded');
+        EOF
+        
+        cat > web/authorized-emails.js << EOF
+        // Emails autorizados
+        // Inyectados automáticamente por GitHub Actions
+        window.AUTHORIZED_EMAILS = '${{ secrets.AUTHORIZED_EMAILS }}';
+        EOF
+    
+    - name: Commit and push if changed
+      run: |
+        git config user.email "github-actions@github.com"
+        git config user.name "GitHub Actions"
+        git add -A
+        git commit -m "chore: inyectar secrets" || exit 0
+        git push

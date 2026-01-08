@@ -1,7 +1,8 @@
 // Configuración de Supabase
+// La clave se inyecta desde GitHub Secrets en supabase-secrets.js
 const SUPABASE_CONFIG = {
     url: 'https://adisallqgbylyffrvhzs.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkaXNhbGxxZ2J5bHlmZnJ2aHpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MjQ0NDYsImV4cCI6MjA4MzQwMDQ0Nn0.qaIKZxIqhPB9d78QLDkQLDsg_94UgcJbOp2QQHVwWqs'
+    anonKey: window.SUPABASE_ANON_KEY || ''
 };
 
 class SupabaseClient {
