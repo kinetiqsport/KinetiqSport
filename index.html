@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Médico - Análisis de Pisada y Presiones Plantares</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="supabase-secrets.js"></script>
+    <script>
+        // Proteger página: verificar que esté logueado
+        window.addEventListener('load', () => {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <img src="kinetiq_logo.png" alt="Logo Kinetiq" class="logo">
+                </div>
+                <div class="title-section">
+                    <h1 class="main-title">Análisis de Pisada y Presiones Plantares</h1>
+                </div>
+                <div class="date-section">
+                    <p class="report-date" id="reportDate"></p>
+                    <a href="reportes.html" style="color: white; font-size: 12px; text-decoration: none; opacity: 0.8;">📋 Mis Reportes</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <form id="reportForm" class="form-container">
+
+                <!-- SECCIÓN 1: DATOS GENERALES -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>DATOS GENERALES</h2>
+                    </div>
+
+                    <div class="section-content">
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="nombre">Nombre:</label>
+                                <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Ingrese nombre">
+                            </div>
+                            <div class="form-group">
+                                <label for="apellido">Apellido:</label>
+                                <input type="text" id="apellido" name="apellido" class="form-control" placeholder="Ingrese apellido">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-4">
+                            <div class="form-group">
+                                <label for="edad">Edad:</label>
+                                <input type="number" id="edad" name="edad" class="form-control" min="0" max="120" placeholder="años">
+                            </div>
+                            <div class="form-group">
+                                <label for="peso">Peso (kg):</label>
+                                <input type="number" id="peso" name="peso" class="form-control" min="20" step="0.1" placeholder="kg">
+                            </div>
+                            <div class="form-group">
+                                <label for="sexo">Sexo:</label>
+                                <select id="sexo" name="sexo" class="form-control">
+                                    <option value="">Seleccione...</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
+                                    <option value="No especificado">No especificado</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="cc">CC:</label>
+                                <input type="text" id="cc" name="cc" class="form-control" placeholder="Cédula">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-4">
+                            <div class="form-group">
+                                <label for="talla">Talla (cm):</label>
+                                <input type="number" id="talla" name="talla" class="form-control" min="50" step="0.1" placeholder="cm">
+                            </div>
+                            <div class="form-group">
+                                <label for="dominancia">Dominancia:</label>
+                                <select id="dominancia" name="dominancia" class="form-control">
+                                    <option value="">Seleccione...</option>
+                                    <option value="Derecha">Derecha</option>
+                                    <option value="Izquierda">Izquierda</option>
+                                    <option value="Ambidiestro">Ambidiestro</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="imc">IMC:</label>
+                                <input type="number" id="imc" name="imc" class="form-control" readonly placeholder="Cálculo automático">
+                            </div>
+                            <div class="form-group">
+                                <label for="celular">Celular:</label>
+                                <input type="tel" id="celular" name="celular" class="form-control" placeholder="10 dígitos">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 2: ANAMNESIS Y ANTECEDENTES CLÍNICOS -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>ANAMNESIS Y ANTECEDENTES CLÍNICOS</h2>
+                    </div>
+
+                    <div class="antecedents-grid">
+                        <div class="form-group">
+                            <label for="antecMedicos">Antecedentes médicos:</label>
+                            <textarea id="antecMedicos" name="antecMedicos" class="form-control textarea" rows="3" placeholder="Ingrese los antecedentes médicos..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="antecQuirurgicos">Antecedentes quirúrgicos:</label>
+                            <textarea id="antecQuirurgicos" name="antecQuirurgicos" class="form-control textarea" rows="3" placeholder="Ingrese los antecedentes quirúrgicos..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="antecLesiones">Antecedentes de lesiones:</label>
+                            <textarea id="antecLesiones" name="antecLesiones" class="form-control textarea" rows="3" placeholder="Ingrese los antecedentes de lesiones..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="antecTrauma">Antecedentes traumáticos:</label>
+                            <textarea id="antecTrauma" name="antecTrauma" class="form-control textarea" rows="3" placeholder="Ingrese los antecedentes traumáticos..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="antecMetabolico">Antecedentes metabólicos:</label>
+                            <textarea id="antecMetabolico" name="antecMetabolico" class="form-control textarea" rows="3" placeholder="Ingrese los antecedentes metabólicos..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="hospitalizaciones">Hospitalizaciones:</label>
+                            <textarea id="hospitalizaciones" name="hospitalizaciones" class="form-control textarea" rows="2" placeholder="Ingrese información de hospitalizaciones..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="alergias">Alergias:</label>
+                            <textarea id="alergias" name="alergias" class="form-control textarea" rows="2" placeholder="Ingrese alergias conocidas..."></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 3: ACTIVIDAD FÍSICA Y ENTRENAMIENTO -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>ACTIVIDAD FÍSICA Y ENTRENAMIENTO</h2>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="deporte">Actividad / Deporte:</label>
+                            <input type="text" id="deporte" name="deporte" class="form-control" placeholder="Ej. Fútbol">
+                        </div>
+                        <div class="form-group">
+                            <label for="tiempoDeporte">Tiempo en el deporte:</label>
+                            <input type="text" id="tiempoDeporte" name="tiempoDeporte" class="form-control" placeholder="Ej. 8 años">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="rol">Rol en el deporte:</label>
+                            <input type="text" id="rol" name="rol" class="form-control" placeholder="Ej. Mediocampista">
+                        </div>
+                        <div class="form-group">
+                            <label for="club">Club:</label>
+                            <input type="text" id="club" name="club" class="form-control" placeholder="Nombre del club">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="entrenador">Entrenador:</label>
+                            <input type="text" id="entrenador" name="entrenador" class="form-control" placeholder="Nombre del entrenador">
+                        </div>
+                        <div class="form-group">
+                            <label for="diasEntrenamiento">Días de entrenamientos:</label>
+                            <input type="text" id="diasEntrenamiento" name="diasEntrenamiento" class="form-control" placeholder="Ej. 5 días">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="diasGimnasio">Días de gimnasio:</label>
+                            <input type="text" id="diasGimnasio" name="diasGimnasio" class="form-control" placeholder="Ej. 3 días">
+                        </div>
+                        <div class="form-group">
+                            <label for="diasDescanso">Días de descanso:</label>
+                            <input type="text" id="diasDescanso" name="diasDescanso" class="form-control" placeholder="Ej. 1 día">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 4: MOTIVO DE CONSULTA -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>MOTIVO DE CONSULTA</h2>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="motivoConsulta">Motivo de consulta:</label>
+                            <textarea id="motivoConsulta" name="motivoConsulta" class="form-control textarea" rows="4" placeholder="Describa el motivo principal de la consulta..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="notasAdicionales">Notas adicionales:</label>
+                            <textarea id="notasAdicionales" name="notasAdicionales" class="form-control textarea" rows="4" placeholder="Ingrese notas adicionales..."></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 5: VALORACIÓN FISIOTERAPIA DEPORTIVA -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>VALORACIÓN FISIOTERAPIA DEPORTIVA</h2>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="postura">Postura:</label>
+                        <textarea id="postura" name="postura" class="form-control textarea" rows="3" placeholder="Describa la valoración postural..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="marcha">Marcha:</label>
+                        <textarea id="marcha" name="marcha" class="form-control textarea" rows="3" placeholder="Describa la valoración de la marcha..."></textarea>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="hods">HODS:</label>
+                            <select id="hods" name="hods" class="form-control">
+                                <option value="">Seleccione...</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="lunge">Lunge:</label>
+                            <select id="lunge" name="lunge" class="form-control">
+                                <option value="">Seleccione...</option>
+                                <option value="+">+</option>
+                                <option value="-">-</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="observaciones">Observaciones:</label>
+                        <textarea id="observaciones" name="observaciones" class="form-control textarea" rows="3" placeholder="Ingrese observaciones adicionales..."></textarea>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 5.5: ANÁLISIS BIOMECÁNICO - OJOS ABIERTOS -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>ANÁLISIS BIOMECÁNICO - OJOS ABIERTOS</h2>
+                    </div>
+
+                    <div class="section-content">
+                        <!-- Equilibrio Bipedal -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin-bottom: 12px; font-weight: 600;">Equilibrio Bipedal</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="areaElipseIzq">Izquierda (cm²):</label>
+                                <input type="number" id="areaElipseIzq" name="areaElipseIzq" class="form-control" step="0.1" placeholder="Ej: 12.9">
+                            </div>
+                            <div class="form-group">
+                                <label for="areaElipseDer">Derecha (cm²):</label>
+                                <input type="number" id="areaElipseDer" name="areaElipseDer" class="form-control" step="0.1" placeholder="Ej: 8.5">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="areaElipseAsim">Asimetría (%):</label>
+                            <input type="number" id="areaElipseAsim" name="areaElipseAsim" class="form-control" step="0.1" placeholder="Ej: 51">
+                        </div>
+
+                        <!-- Desviaciones Internas -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin: 20px 0 12px; font-weight: 600;">Desviaciones Internas</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="desvIntIzq">Izquierda (%):</label>
+                                <input type="number" id="desvIntIzq" name="desvIntIzq" class="form-control" step="0.1" placeholder="Ej: 17.9">
+                            </div>
+                            <div class="form-group">
+                                <label for="desvIntDer">Derecha (%):</label>
+                                <input type="number" id="desvIntDer" name="desvIntDer" class="form-control" step="0.1" placeholder="Ej: 8.5">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="desvIntAsim">Asimetría (%):</label>
+                            <input type="number" id="desvIntAsim" name="desvIntAsim" class="form-control" step="0.1" placeholder="Ej: 51">
+                        </div>
+
+                        <!-- Bipodestación Lateral -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin: 20px 0 12px; font-weight: 600;">Bipodestación Lateral</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="bipodLateralIzq">Izquierda (cm²):</label>
+                                <input type="number" id="bipodLateralIzq" name="bipodLateralIzq" class="form-control" step="0.1" placeholder="Ej: 12.9">
+                            </div>
+                            <div class="form-group">
+                                <label for="bipodLateralDer">Derecha (cm²):</label>
+                                <input type="number" id="bipodLateralDer" name="bipodLateralDer" class="form-control" step="0.1" placeholder="Ej: 10.3">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bipodLateralAsim">Asimetría (%):</label>
+                            <input type="number" id="bipodLateralAsim" name="bipodLateralAsim" class="form-control" step="0.1" placeholder="Ej: 45">
+                        </div>
+
+                        <!-- Distribución de Peso Talón-Dedos -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin: 20px 0 12px; font-weight: 600;">Distribución de Peso Talón-Dedos</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="distPesoTalonIzq">Talón Izq (%):</label>
+                                <input type="number" id="distPesoTalonIzq" name="distPesoTalonIzq" class="form-control" step="0.1" placeholder="Ej: 48.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="distPesoTalonDer">Talón Der (%):</label>
+                                <input type="number" id="distPesoTalonDer" name="distPesoTalonDer" class="form-control" step="0.1" placeholder="Ej: 51.5">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="distPesoDedosIzq">Dedos Izq (%):</label>
+                                <input type="number" id="distPesoDedosIzq" name="distPesoDedosIzq" class="form-control" step="0.1" placeholder="Ej: 52.1">
+                            </div>
+                            <div class="form-group">
+                                <label for="distPesoDedosDer">Dedos Der (%):</label>
+                                <input type="number" id="distPesoDedosDer" name="distPesoDedosDer" class="form-control" step="0.1" placeholder="Ej: 47.9">
+                            </div>
+                        </div>
+
+                        <!-- Asimetría en Amplitud Talón-Dedos -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin: 20px 0 12px; font-weight: 600;">Asimetría en Amplitud Talón-Dedos</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="asimAmpTalonDedosIzq">Izquierda (%):</label>
+                                <input type="number" id="asimAmpTalonDedosIzq" name="asimAmpTalonDedosIzq" class="form-control" step="0.1" placeholder="Ej: 17.9">
+                            </div>
+                            <div class="form-group">
+                                <label for="asimAmpTalonDedosDer">Derecha (%):</label>
+                                <input type="number" id="asimAmpTalonDedosDer" name="asimAmpTalonDedosDer" class="form-control" step="0.1" placeholder="Ej: 18.2">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 5.6: ANÁLISIS BIOMECÁNICO - OJOS CERRADOS -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>ANÁLISIS BIOMECÁNICO - OJOS CERRADOS</h2>
+                    </div>
+
+                    <div class="section-content">
+                        <!-- Equilibrio Bipedal -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin-bottom: 12px; font-weight: 600;">Equilibrio Bipedal</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="areaElipseIzqCC">Izquierda (cm²):</label>
+                                <input type="number" id="areaElipseIzqCC" name="areaElipseIzqCC" class="form-control" step="0.1" placeholder="Ej: 12.9">
+                            </div>
+                            <div class="form-group">
+                                <label for="areaElipseDerCC">Derecha (cm²):</label>
+                                <input type="number" id="areaElipseDerCC" name="areaElipseDerCC" class="form-control" step="0.1" placeholder="Ej: 8.5">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="areaElipseAsimCC">Asimetría (%):</label>
+                            <input type="number" id="areaElipseAsimCC" name="areaElipseAsimCC" class="form-control" step="0.1" placeholder="Ej: 51">
+                        </div>
+
+                        <!-- Desviaciones Internas -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin: 20px 0 12px; font-weight: 600;">Desviaciones Internas</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="desvIntIzqCC">Izquierda (%):</label>
+                                <input type="number" id="desvIntIzqCC" name="desvIntIzqCC" class="form-control" step="0.1" placeholder="Ej: 17.9">
+                            </div>
+                            <div class="form-group">
+                                <label for="desvIntDerCC">Derecha (%):</label>
+                                <input type="number" id="desvIntDerCC" name="desvIntDerCC" class="form-control" step="0.1" placeholder="Ej: 8.5">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="desvIntAsimCC">Asimetría (%):</label>
+                            <input type="number" id="desvIntAsimCC" name="desvIntAsimCC" class="form-control" step="0.1" placeholder="Ej: 51">
+                        </div>
+
+                        <!-- Bipodestación Lateral -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin: 20px 0 12px; font-weight: 600;">Bipodestación Lateral</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="bipodLateralIzqCC">Izquierda (cm²):</label>
+                                <input type="number" id="bipodLateralIzqCC" name="bipodLateralIzqCC" class="form-control" step="0.1" placeholder="Ej: 12.9">
+                            </div>
+                            <div class="form-group">
+                                <label for="bipodLateralDerCC">Derecha (cm²):</label>
+                                <input type="number" id="bipodLateralDerCC" name="bipodLateralDerCC" class="form-control" step="0.1" placeholder="Ej: 10.3">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bipodLateralAsimCC">Asimetría (%):</label>
+                            <input type="number" id="bipodLateralAsimCC" name="bipodLateralAsimCC" class="form-control" step="0.1" placeholder="Ej: 45">
+                        </div>
+
+                        <!-- Distribución de Peso Talón-Dedos -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin: 20px 0 12px; font-weight: 600;">Distribución de Peso Talón-Dedos</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="distPesoTalonIzqCC">Talón Izq (%):</label>
+                                <input type="number" id="distPesoTalonIzqCC" name="distPesoTalonIzqCC" class="form-control" step="0.1" placeholder="Ej: 48.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="distPesoTalonDerCC">Talón Der (%):</label>
+                                <input type="number" id="distPesoTalonDerCC" name="distPesoTalonDerCC" class="form-control" step="0.1" placeholder="Ej: 51.5">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="distPesoDedosIzqCC">Dedos Izq (%):</label>
+                                <input type="number" id="distPesoDedosIzqCC" name="distPesoDedosIzqCC" class="form-control" step="0.1" placeholder="Ej: 52.1">
+                            </div>
+                            <div class="form-group">
+                                <label for="distPesoDedosDerCC">Dedos Der (%):</label>
+                                <input type="number" id="distPesoDedosDerCC" name="distPesoDedosDerCC" class="form-control" step="0.1" placeholder="Ej: 47.9">
+                            </div>
+                        </div>
+
+                        <!-- Asimetría en Amplitud Talón-Dedos -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin: 20px 0 12px; font-weight: 600;">Asimetría en Amplitud Talón-Dedos</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="asimAmpTalonDedosIzqCC">Izquierda (%):</label>
+                                <input type="number" id="asimAmpTalonDedosIzqCC" name="asimAmpTalonDedosIzqCC" class="form-control" step="0.1" placeholder="Ej: 17.9">
+                            </div>
+                            <div class="form-group">
+                                <label for="asimAmpTalonDedosDerCC">Derecha (%):</label>
+                                <input type="number" id="asimAmpTalonDedosDerCC" name="asimAmpTalonDedosDerCC" class="form-control" step="0.1" placeholder="Ej: 18.2">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 6: EQUILIBRIO UNIPODAL -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>EQUILIBRIO UNIPODAL</h2>
+                    </div>
+
+                    <h3 style="color: var(--primary-color); font-size: 14px; margin: 16px 0 12px; font-weight: 600; padding-left: 24px;">Distribución de Peso</h3>
+
+                    <div class="table-responsive">
+                        <table class="data-table clean-table">
+                            <thead>
+                                <tr>
+                                    <th>Posición</th>
+                                    <th>Izquierda (%)</th>
+                                    <th>Derecha (%)</th>
+                                    <th>Asimetría (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Talón</td>
+                                    <td><input type="number" class="unipodal-input" data-unipodal="talon" data-col="izq" step="0.1"></td>
+                                    <td><input type="number" class="unipodal-input" data-unipodal="talon" data-col="der" step="0.1"></td>
+                                    <td><input type="number" class="unipodal-input" data-unipodal="talon" data-col="asim" step="0.1"></td>
+                                </tr>
+                                <tr>
+                                    <td>Punta</td>
+                                    <td><input type="number" class="unipodal-input" data-unipodal="punta" data-col="izq" step="0.1"></td>
+                                    <td><input type="number" class="unipodal-input" data-unipodal="punta" data-col="der" step="0.1"></td>
+                                    <td><input type="number" class="unipodal-input" data-unipodal="punta" data-col="asim" step="0.1"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Trazado de CdP -->
+                    <h3 style="color: var(--primary-color); font-size: 14px; margin: 20px 0 12px; font-weight: 600; padding-left: 24px;">Trazado de CdP</h3>
+                    
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>CdP</th>
+                                    <th style="text-align: center;">Izquierda</th>
+                                    <th style="text-align: center;">Derecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Anterior</td>
+                                    <td style="text-align: center; vertical-align: middle;"><input type="checkbox" id="uniAnteriorIzq" name="uniAnteriorIzq" style="width: 20px; height: 20px; cursor: pointer;"></td>
+                                    <td style="text-align: center; vertical-align: middle;"><input type="checkbox" id="uniAnteriorDer" name="uniAnteriorDer" style="width: 20px; height: 20px; cursor: pointer;"></td>
+                                </tr>
+                                <tr>
+                                    <td>Medial</td>
+                                    <td style="text-align: center; vertical-align: middle;"><input type="checkbox" id="uniMedialIzq" name="uniMedialIzq" style="width: 20px; height: 20px; cursor: pointer;"></td>
+                                    <td style="text-align: center; vertical-align: middle;"><input type="checkbox" id="uniMedialDer" name="uniMedialDer" style="width: 20px; height: 20px; cursor: pointer;"></td>
+                                </tr>
+                                <tr>
+                                    <td>Posterior</td>
+                                    <td style="text-align: center; vertical-align: middle;"><input type="checkbox" id="uniPosteriorIzq" name="uniPosteriorIzq" style="width: 20px; height: 20px; cursor: pointer;"></td>
+                                    <td style="text-align: center; vertical-align: middle;"><input type="checkbox" id="uniPosteriorDer" name="uniPosteriorDer" style="width: 20px; height: 20px; cursor: pointer;"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 7: ANÁLISIS DE SENTADILLA -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>ANÁLISIS DE SENTADILLA</h2>
+                    </div>
+
+                    <div class="section-content">
+                        <!-- Número de Sentadillas -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin-bottom: 12px; font-weight: 600; padding-left: 0px;">Número de Sentadillas</h3>
+                        
+                        <div class="form-group">
+                            <input type="number" id="sentNumSentadillas" name="sentNumSentadillas" class="form-control" step="1" placeholder="Ej: 20">
+                        </div>
+
+                        <!-- Distribución de Peso -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin: 20px 0 12px; font-weight: 600; padding-left: 0px;">Distribución de Peso</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="sentDistPesoIzq">Izquierda (%):</label>
+                                <input type="number" id="sentDistPesoIzq" name="sentDistPesoIzq" class="form-control" step="0.1" placeholder="Ej: 48.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="sentDistPesoDer">Derecha (%):</label>
+                                <input type="number" id="sentDistPesoDer" name="sentDistPesoDer" class="form-control" step="0.1" placeholder="Ej: 51.5">
+                            </div>
+                        </div>
+
+                        <!-- Fuerza Máxima -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin: 20px 0 12px; font-weight: 600; padding-left: 0px;">Fuerza Máxima</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="sentFuerzaIzqKg">Izquierda (Kg):</label>
+                                <input type="number" id="sentFuerzaIzqKg" name="sentFuerzaIzqKg" class="form-control" step="0.1" placeholder="Ej: 45.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="sentFuerzaDerKg">Derecha (Kg):</label>
+                                <input type="number" id="sentFuerzaDerKg" name="sentFuerzaDerKg" class="form-control" step="0.1" placeholder="Ej: 48.3">
+                            </div>
+                        </div>
+
+                        <!-- Asimetría -->
+                        <div class="form-group">
+                            <label for="sentAsimPorcentaje">Asimetría (%):</label>
+                            <input type="number" id="sentAsimPorcentaje" name="sentAsimPorcentaje" class="form-control" step="0.1" placeholder="Ej: 5.8">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 8: ANÁLISIS DE FLEXIONES -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>ANÁLISIS DE FLEXIONES</h2>
+                    </div>
+
+                    <div class="section-content">
+                        <!-- Número de Repeticiones -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin-bottom: 12px; font-weight: 600;">Número de Repeticiones</h3>
+                        
+                        <div class="form-group">
+                            <input type="number" id="flexNumReps" name="flexNumReps" class="form-control" step="1" placeholder="Ej: 15">
+                        </div>
+
+                        <!-- Distribución de Peso -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin: 20px 0 12px; font-weight: 600;">Distribución de Peso</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="flexDistPesoIzq">Izquierda (%):</label>
+                                <input type="number" id="flexDistPesoIzq" name="flexDistPesoIzq" class="form-control" step="0.1" placeholder="Ej: 48.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="flexDistPesoDer">Derecha (%):</label>
+                                <input type="number" id="flexDistPesoDer" name="flexDistPesoDer" class="form-control" step="0.1" placeholder="Ej: 51.5">
+                            </div>
+                        </div>
+
+                        <!-- Fuerza Máxima -->
+                        <h3 style="color: var(--primary-color); font-size: 14px; margin: 20px 0 12px; font-weight: 600;">Fuerza Máxima</h3>
+                        
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="flexFuerzaIzqKg">Izquierda (Kg):</label>
+                                <input type="number" id="flexFuerzaIzqKg" name="flexFuerzaIzqKg" class="form-control" step="0.1" placeholder="Ej: 25.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="flexFuerzaDerKg">Derecha (Kg):</label>
+                                <input type="number" id="flexFuerzaDerKg" name="flexFuerzaDerKg" class="form-control" step="0.1" placeholder="Ej: 28.3">
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="flexAsimPorcentaje">Asimetría (%):</label>
+                                <input type="number" id="flexAsimPorcentaje" name="flexAsimPorcentaje" class="form-control" step="0.1" placeholder="Ej: 10.9">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 9: TESTS DE SALTO -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>TESTS DE SALTO</h2>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Salto</th>
+                                    <th>Peso</th>
+                                    <th>Altura</th>
+                                    <th>Velocidad</th>
+                                    <th>Tiempo Vuelo</th>
+                                    <th>Q</th>
+                                    <th>Caída</th>
+                                    <th>N</th>
+                                    <th>RFD</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>CMJ</strong></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj" data-col="peso" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj" data-col="altura" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj" data-col="velocidad" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj" data-col="tiempoVuelo" step="0.001"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj" data-col="q" step="0.01"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj" data-col="caida" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj" data-col="n" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj" data-col="rfd" step="1"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>SJ</strong></td>
+                                    <td><input type="number" class="salto-input" data-salto="sj" data-col="peso" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="sj" data-col="altura" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="sj" data-col="velocidad" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="sj" data-col="tiempoVuelo" step="0.001"></td>
+                                    <td><input type="number" class="salto-input" data-salto="sj" data-col="q" step="0.01"></td>
+                                    <td><input type="number" class="salto-input" data-salto="sj" data-col="caida" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="sj" data-col="n" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="sj" data-col="rfd" step="1"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>DJ</strong></td>
+                                    <td><input type="number" class="salto-input" data-salto="dj" data-col="peso" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="dj" data-col="altura" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="dj" data-col="velocidad" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="dj" data-col="tiempoVuelo" step="0.001"></td>
+                                    <td><input type="number" class="salto-input" data-salto="dj" data-col="q" step="0.01"></td>
+                                    <td><input type="number" class="salto-input" data-salto="dj" data-col="caida" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="dj" data-col="n" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="dj" data-col="rfd" step="1"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Abralakov</strong></td>
+                                    <td><input type="number" class="salto-input" data-salto="abralakov" data-col="peso" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="abralakov" data-col="altura" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="abralakov" data-col="velocidad" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="abralakov" data-col="tiempoVuelo" step="0.001"></td>
+                                    <td><input type="number" class="salto-input" data-salto="abralakov" data-col="q" step="0.01"></td>
+                                    <td><input type="number" class="salto-input" data-salto="abralakov" data-col="caida" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="abralakov" data-col="n" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="abralakov" data-col="rfd" step="1"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CMJ 1-1</strong></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj1-1" data-col="peso" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj1-1" data-col="altura" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj1-1" data-col="velocidad" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj1-1" data-col="tiempoVuelo" step="0.001"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj1-1" data-col="q" step="0.01"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj1-1" data-col="caida" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj1-1" data-col="n" step="0.1"></td>
+                                    <td><input type="number" class="salto-input" data-salto="cmj1-1" data-col="rfd" step="1"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 10: DINAMOMETRÍA -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>DINAMOMETRÍA</h2>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dinamometria">Datos de Dinamometría:</label>
+                        <textarea id="dinamometria" name="dinamometria" class="form-control textarea" rows="4" placeholder="Ingrese los datos de dinamometría..."></textarea>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 11: VELOCIDAD Y GONIOMETRÍA -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>VELOCIDAD Y GONIOMETRÍA</h2>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="velocidad">Datos de Velocidad y Goniometría:</label>
+                        <textarea id="velocidad" name="velocidad" class="form-control textarea" rows="4" placeholder="Ingrese los datos de velocidad y goniometría..."></textarea>
+                    </div>
+                </section>
+
+                <!-- BOTONES DE ACCIÓN -->
+                <section class="action-section">
+                    <div class="button-group">
+                        <button type="reset" class="btn btn-secondary">
+                            <span>🔄</span> Limpiar
+                        </button>
+                        <button type="button" class="btn btn-info" id="loadFileBtn">
+                            <span>📥</span> Cargar Reporte
+                        </button>
+                        <button type="button" class="btn btn-primary" id="printBtn">
+                            <span>📄</span> Descargar PDF
+                        </button>
+                        <a href="bienvenida.html" class="btn btn-secondary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <span>←</span> Volver al Inicio
+                        </a>
+                    </div>
+                </section>
+
+            </form>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p>&copy; KinetiqSports. Reporte Médico Digital. Diseñado para profesionales de la salud.</p>
+        </footer>
+    </div>
+
+    <!-- Input oculto para cargar archivos -->
+    <input type="file" id="fileInput" accept=".json" style="display: none;">
+
+    <!-- Modal de confirmación -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-icon">📄</div>
+            <h2 class="modal-title">¿Descargar y Guardar Reporte?</h2>
+            <p class="modal-message">
+                Se descargará el PDF y los datos del paciente se guardarán en la base de datos de forma segura.
+            </p>
+            <div class="modal-loading">
+                <div class="spinner"></div>
+                <p style="color: #7f8c8d;">Guardando datos...</p>
+            </div>
+            <div class="modal-buttons">
+                <button id="modalCancel" class="modal-btn modal-btn-cancel">Cancelar</button>
+                <button id="modalConfirm" class="modal-btn modal-btn-confirm">Sí, Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
