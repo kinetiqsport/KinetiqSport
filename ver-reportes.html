@@ -6,6 +6,15 @@
     <title>Ver Reportes - KinetiqSports</title>
     <link rel="stylesheet" href="styles.css">
     <script src="supabase-config.js"></script>
+    <script>
+        // Proteger página: verificar que esté logueado
+        window.addEventListener('load', () => {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
     <style>
         .reportes-container {
             max-width: 1200px;
