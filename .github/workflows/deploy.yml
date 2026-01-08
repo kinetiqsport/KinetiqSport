@@ -38,10 +38,9 @@ jobs:
         window.AUTHORIZED_EMAILS = '${{ secrets.AUTHORIZED_EMAILS }}';
         EOF
     
-    - name: Commit and push if changed
-      run: |
-        git config user.email "github-actions@github.com"
-        git config user.name "GitHub Actions"
-        git add -A
-        git commit -m "chore: inyectar secrets" || exit 0
-        git push
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
+        publish_branch: gh-pages
