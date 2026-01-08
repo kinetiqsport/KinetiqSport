@@ -285,16 +285,6 @@
             }
         }
 
-        // Email login (validar email autorizado)
-        emailSubmitBtn.addEventListener('click', () => {
-            const email = document.getElementById('email').value.trim();
-            
-            if (!email || !email.includes('@')) {
-                showError('Por favor ingresa un email válido');
-                return;
-            }
-        }
-
         // Helpers
         function showLoading(show) {
             loadingBox.classList.toggle('active', show);
