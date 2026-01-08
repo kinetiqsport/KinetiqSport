@@ -115,91 +115,6 @@
             height: 20px;
         }
 
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 25px 0;
-            color: #bdc3c7;
-            font-size: 14px;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #e0e0e0;
-        }
-
-        .email-login {
-            display: none;
-        }
-
-        .email-login.active {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            color: #2c3e50;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .email-submit-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .email-submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .toggle-email-btn {
-            background: none;
-            border: none;
-            color: #667eea;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: underline;
-            margin-top: 15px;
-            width: 100%;
-            text-align: center;
-        }
-
-        .toggle-email-btn:hover {
-            color: #764ba2;
-        }
-
         .loading {
             display: none;
             text-align: center;
@@ -286,21 +201,6 @@
                 Iniciar con Google
             </button>
 
-            <div class="divider">o</div>
-
-            <!-- Email Login (opcional, oculto por defecto) -->
-            <div class="email-login" id="emailLogin">
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" placeholder="tu@email.com">
-                </div>
-                <button class="email-submit-btn" id="emailSubmitBtn">Continuar</button>
-            </div>
-
-            <button class="toggle-email-btn" id="toggleEmailBtn">
-                ¿Prefieres usar email?
-            </button>
-
             <!-- Loading -->
             <div class="loading" id="loadingBox">
                 <div class="spinner"></div>
@@ -314,19 +214,8 @@
     <script src="authorized-emails.js"></script>
     <script>
         const googleLoginBtn = document.getElementById('googleLoginBtn');
-        const toggleEmailBtn = document.getElementById('toggleEmailBtn');
-        const emailLogin = document.getElementById('emailLogin');
-        const emailSubmitBtn = document.getElementById('emailSubmitBtn');
         const errorMessage = document.getElementById('errorMessage');
         const loadingBox = document.getElementById('loadingBox');
-
-        // Toggle email login
-        toggleEmailBtn.addEventListener('click', () => {
-            emailLogin.classList.toggle('active');
-            toggleEmailBtn.textContent = emailLogin.classList.contains('active') 
-                ? 'Usar Google en su lugar' 
-                : '¿Prefieres usar email?';
-        });
 
         // Google Login
         googleLoginBtn.addEventListener('click', () => {
@@ -404,25 +293,7 @@
                 showError('Por favor ingresa un email válido');
                 return;
             }
-
-            // Verificar si el email está en la lista autorizada
-            const authorizedEmails = (window.AUTHORIZED_EMAILS || '').split(',').map(e => e.trim());
-            if (!authorizedEmails.includes(email)) {
-                showError(`Email no autorizado: ${email}`);
-                return;
-            }
-
-            showLoading(true);
-
-            // Simular login
-            setTimeout(() => {
-                sessionStorage.setItem('userEmail', email);
-                sessionStorage.setItem('userName', email.split('@')[0]);
-                sessionStorage.setItem('isLoggedIn', 'true');
-                
-                window.location.href = 'bienvenida.html';
-            }, 1000);
-        });
+        }
 
         // Helpers
         function showLoading(show) {
