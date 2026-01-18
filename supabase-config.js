@@ -1,39 +1,39 @@
+// Importar librería oficial de Supabase
+const { createClient } = window.supabase || {};
+
 // Configuración de Supabase
-// La clave se inyecta desde GitHub Secrets en supabase-secrets.js
 const SUPABASE_CONFIG = {
     url: 'https://adisallqgbylyffrvhzs.supabase.co',
     anonKey: window.SUPABASE_ANON_KEY || ''
 };
 
+// Cargar librería de Supabase si no está disponible
+if (!window.supabase) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    script.onload = () => {
+        window.supabaseLoaded = true;
+    };
+    document.head.appendChild(script);
+}
+
 class SupabaseClient {
     constructor() {
-        this.url = SUPABASE_CONFIG.url;
-        this.apiKey = SUPABASE_CONFIG.anonKey;
-        this.headers = {
-            'Content-Type': 'application/json',
-            'apikey': this.apiKey,
-            'Authorization': `Bearer ${this.apiKey}`
-        };
+        this.supabase = window.supabase?.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+        if (!this.supabase) {
+            console.error('Supabase no cargado correctamente');
+        }
     }
 
     async saveReporte(data) {
         try {
-            const response = await fetch(`${this.url}/rest/v1/reportes`, {
-                method: 'POST',
-                headers: {
-                    ...this.headers,
-                    'Prefer': 'return=representation'
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Error al guardar: ${response.statusText} - ${errorText}`);
-            }
-
-            const text = await response.text();
-            return text ? JSON.parse(text) : null;
+            const { data: result, error } = await this.supabase
+                .from('reportes')
+                .insert([data])
+                .select();
+            
+            if (error) throw error;
+            return result?.[0] || null;
         } catch (error) {
             console.error('Error guardando reporte:', error);
             throw error;
@@ -42,22 +42,14 @@ class SupabaseClient {
 
     async updateReporte(cedula, data) {
         try {
-            const response = await fetch(`${this.url}/rest/v1/reportes?cedula=eq.${cedula}`, {
-                method: 'PATCH',
-                headers: {
-                    ...this.headers,
-                    'Prefer': 'return=representation'
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Error al actualizar: ${response.statusText} - ${errorText}`);
-            }
-
-            const text = await response.text();
-            return text ? JSON.parse(text) : null;
+            const { data: result, error } = await this.supabase
+                .from('reportes')
+                .update(data)
+                .eq('cedula', cedula)
+                .select();
+            
+            if (error) throw error;
+            return result?.[0] || null;
         } catch (error) {
             console.error('Error actualizando reporte:', error);
             throw error;
@@ -66,16 +58,14 @@ class SupabaseClient {
 
     async getReporteByCedula(cedula) {
         try {
-            const response = await fetch(`${this.url}/rest/v1/reportes?cedula=eq.${cedula}`, {
-                headers: this.headers
-            });
-
-            if (!response.ok) {
-                throw new Error(`Error al buscar: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            return data.length > 0 ? data[0] : null;
+            const { data, error } = await this.supabase
+                .from('reportes')
+                .select('*')
+                .eq('cedula', cedula)
+                .single();
+            
+            if (error && error.code !== 'PGRST116') throw error;
+            return data || null;
         } catch (error) {
             console.error('Error buscando reporte:', error);
             throw error;
@@ -84,15 +74,13 @@ class SupabaseClient {
 
     async getAllReportes() {
         try {
-            const response = await fetch(`${this.url}/rest/v1/reportes?select=*&order=fecha_modificacion.desc`, {
-                headers: this.headers
-            });
-
-            if (!response.ok) {
-                throw new Error(`Error al listar: ${response.statusText}`);
-            }
-
-            return await response.json();
+            const { data, error } = await this.supabase
+                .from('reportes')
+                .select('*')
+                .order('fecha_modificacion', { ascending: false });
+            
+            if (error) throw error;
+            return data || [];
         } catch (error) {
             console.error('Error listando reportes:', error);
             throw error;
@@ -100,5 +88,12 @@ class SupabaseClient {
     }
 }
 
-// Instancia global
+// Instancia global con delay para asegurar carga de librería
 window.supabase = new SupabaseClient();
+
+// Reintentar si Supabase aún no está listo
+setTimeout(() => {
+    if (!window.supabase.supabase && window.supabase?.createClient) {
+        window.supabase = new SupabaseClient();
+    }
+}, 1000);
