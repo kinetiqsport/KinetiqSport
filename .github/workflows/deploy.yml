@@ -37,6 +37,12 @@ jobs:
         // Inyectados automáticamente por GitHub Actions
         window.AUTHORIZED_EMAILS = '${{ secrets.AUTHORIZED_EMAILS }}';
         EOF
+
+    - name: Permitir incluir archivos ignorados solo para deploy
+      run: |
+        sed -i '/supabase-secrets.js/d' .gitignore
+        sed -i '/google-auth-config.js/d' .gitignore
+        sed -i '/authorized-emails.js/d' .gitignore
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
