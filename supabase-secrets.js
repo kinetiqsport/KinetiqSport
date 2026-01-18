@@ -1,0 +1,2 @@
+// Inyectado automáticamente por GitHub Actions
+window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkaXNhbGxxZ2J5bHlmZnJ2aHpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MjQ0NDYsImV4cCI6MjA4MzQwMDQ0Nn0.qaIKZxIqhPB9d78QLDkQLDsg_94UgcJbOp2QQHVwWqs';

@@ -1,7 +1,4 @@
 # Ignorar archivos con secrets
-supabase-secrets.js
-google-auth-config.js
-authorized-emails.js
 .env
 .env.local
 .env.*.local
