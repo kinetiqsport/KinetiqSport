@@ -791,7 +791,8 @@ class ReporteMedico {
                     ['Deporte:', document.getElementById('deporte')?.value || '-', 'Tiempo practicando:', document.getElementById('tiempoDeporte')?.value || '-'],
                     ['Rol/Posición:', document.getElementById('rol')?.value || '-', 'Club:', document.getElementById('club')?.value || '-'],
                     ['Entrenador:', document.getElementById('entrenador')?.value || '-', 'Días entrenamiento:', (document.getElementById('diasEntrenamiento')?.value || '-') + (document.getElementById('diasEntrenamiento')?.value ? ' días' : '')],
-                    ['Días gimnasio:', (document.getElementById('diasGimnasio')?.value || '-') + (document.getElementById('diasGimnasio')?.value ? ' días' : ''), 'Días descanso:', (document.getElementById('diasDescanso')?.value || '-') + (document.getElementById('diasDescanso')?.value ? ' días' : '')]
+                    ['Días gimnasio:', (document.getElementById('diasGimnasio')?.value || '-') + (document.getElementById('diasGimnasio')?.value ? ' días' : ''), 'Días descanso:', (document.getElementById('diasDescanso')?.value || '-') + (document.getElementById('diasDescanso')?.value ? ' días' : '')],
+                    ['Tenis que usa:', document.getElementById('tenis')?.value || '-', 'Carrera/Competencia:', document.getElementById('competencia')?.value || '-']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 3.5, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
