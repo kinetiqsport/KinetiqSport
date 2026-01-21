@@ -7,6 +7,30 @@ const SUPABASE_CONFIG = {
     anonKey: window.SUPABASE_ANON_KEY || ''
 };
 
+// Cargar la librería del CDN de forma controlada
+function loadSupabaseLibrary() {
+    return new Promise((resolve, reject) => {
+        // Verificar si ya está cargada
+        if (window.supabase?.createClient) {
+            resolve();
+            return;
+        }
+        
+        // Crear script tag
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+        script.onload = () => {
+            console.log('✓ Librería Supabase cargada del CDN');
+            resolve();
+        };
+        script.onerror = () => {
+            console.error('❌ Error cargando librería Supabase del CDN');
+            reject(new Error('No se pudo cargar Supabase del CDN'));
+        };
+        document.head.appendChild(script);
+    });
+}
+
 // La librería se carga desde el CDN, se debe esperar a que esté lista
 // El CDN carga a window.supabase.createClient
 
@@ -104,12 +128,15 @@ class SupabaseClient {
 }
 
 // Instancia global con delay para asegurar carga de librería
-function initSupabaseClient() {
+async function initSupabaseClient() {
     try {
+        // Cargar la librería del CDN primero
+        await loadSupabaseLibrary();
+        
         // Verificar que createClient esté disponible en window.supabase
         if (!window.supabase?.createClient) {
-            console.log('⏳ Esperando que Supabase cargue...');
-            setTimeout(initSupabaseClient, 300);
+            console.error('❌ window.supabase.createClient no disponible después de cargar CDN');
+            setTimeout(initSupabaseClient, 500);
             return;
         }
         
@@ -120,15 +147,15 @@ function initSupabaseClient() {
         window.supabaseClient = new SupabaseClient();
     } catch (error) {
         console.error('❌ Error inicializando SupabaseClient:', error);
-        setTimeout(initSupabaseClient, 500);
+        setTimeout(initSupabaseClient, 1000);
     }
 }
 
 // Esperar a que el DOM esté listo Y que la librería esté cargada
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(initSupabaseClient, 100);
+        initSupabaseClient();
     });
 } else {
-    setTimeout(initSupabaseClient, 100);
+    initSupabaseClient();
 }
