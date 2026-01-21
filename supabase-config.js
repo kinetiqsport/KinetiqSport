@@ -110,19 +110,25 @@ class SupabaseClient {
 
 // Instancia global con delay para asegurar carga de librería
 function initSupabaseClient() {
-    if (!window.supabase || !window.supabase.createClient) {
-        // Si Supabase aún no está listo, reintentar
+    try {
+        // Verificar que createClient esté disponible
+        if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+            console.log('Supabase no está listo, reintentando en 500ms...');
+            setTimeout(initSupabaseClient, 500);
+            return;
+        }
+        
+        window.supabaseClient = new SupabaseClient();
+        console.log('✓ SupabaseClient inicializado correctamente');
+    } catch (error) {
+        console.error('Error inicializando SupabaseClient:', error);
         setTimeout(initSupabaseClient, 500);
-        return;
     }
-    
-    window.supabaseClient = new SupabaseClient();
-    console.log('SupabaseClient inicializado correctamente');
 }
 
 // Esperar a que el DOM esté listo
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initSupabaseClient);
 } else {
-    initSupabaseClient();
+    setTimeout(initSupabaseClient, 100);
 }
