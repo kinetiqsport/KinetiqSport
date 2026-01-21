@@ -596,7 +596,7 @@ class ReporteMedico {
     async guardarEnDB() {
         try {
             // Verificar que Supabase esté configurado
-            if (!window.supabase || !window.supabase.apiKey) {
+            if (!window.supabaseClient) {
                 console.warn('Supabase no configurado, saltando guardado en DB');
                 return;
             }
@@ -614,7 +614,7 @@ class ReporteMedico {
             const reporteData = this.collectFormData();
 
             // Obtener el usuario autenticado
-            const currentUser = await window.supabase.getCurrentUser();
+            const currentUser = await window.supabaseClient.getCurrentUser();
             const userId = currentUser?.id;
 
             if (!userId) {
@@ -632,16 +632,16 @@ class ReporteMedico {
             };
 
             // Verificar si ya existe un reporte con esta cédula
-            const existente = await window.supabase.getReporteByCedula(cedula);
+            const existente = await window.supabaseClient.getReporteByCedula(cedula);
 
             if (existente) {
                 // Actualizar reporte existente
-                await window.supabase.updateReporte(cedula, dataToSave);
+                await window.supabaseClient.updateReporte(cedula, dataToSave);
                 console.log('Reporte actualizado en DB');
             } else {
                 // Crear nuevo reporte
                 dataToSave.fecha_creacion = new Date().toISOString();
-                await window.supabase.saveReporte(dataToSave);
+                await window.supabaseClient.saveReporte(dataToSave);
                 console.log('Reporte guardado en DB');
             }
 

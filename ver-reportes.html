@@ -271,12 +271,12 @@
 
             async waitForSupabase() {
                 let attempts = 0;
-                while ((!window.supabase || !window.supabase.supabase) && attempts < 20) {
+                while ((!window.supabaseClient || !window.supabaseClient.supabase) && attempts < 20) {
                     await new Promise(resolve => setTimeout(resolve, 250));
                     attempts++;
                 }
                 
-                if (!window.supabase || !window.supabase.supabase) {
+                if (!window.supabaseClient || !window.supabaseClient.supabase) {
                     console.error('Supabase no se cargó después de esperar');
                 }
             }
@@ -293,7 +293,7 @@
 
             async loadReportes() {
                 try {
-                    if (!window.supabase || !window.supabase.supabase) {
+                    if (!window.supabaseClient || !window.supabaseClient.supabase) {
                         this.showError('Error: Supabase no está configurado correctamente');
                         return;
                     }

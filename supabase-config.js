@@ -116,7 +116,7 @@ function initSupabaseClient() {
         return;
     }
     
-    window.supabase = new SupabaseClient();
+    window.supabaseClient = new SupabaseClient();
     console.log('SupabaseClient inicializado correctamente');
 }
 
