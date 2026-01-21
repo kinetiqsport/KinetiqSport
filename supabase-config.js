@@ -1,5 +1,5 @@
 // Importar librería oficial de Supabase
-const { createClient } = window.supabase || {};
+let createClient = null;
 
 // Configuración de Supabase
 const SUPABASE_CONFIG = {
@@ -16,7 +16,16 @@ if (!window.supabase) {
 
 class SupabaseClient {
     constructor() {
-        this.supabase = window.supabase?.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+        // Obtener createClient de window.supabase
+        const supabaseLib = window.supabase || {};
+        createClient = supabaseLib.createClient;
+        
+        if (!createClient) {
+            console.error('Supabase createClient no disponible');
+            return;
+        }
+        
+        this.supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
         if (!this.supabase) {
             console.error('Supabase no cargado correctamente');
         }
