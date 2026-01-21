@@ -210,6 +210,8 @@
     </div>
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="supabase-secrets.js"></script>
+    <script src="supabase-config.js"></script>
     <script src="google-auth-config.js"></script>
     <script src="authorized-emails.js"></script>
     <script>
@@ -248,7 +250,7 @@
         }
 
         // Callback para Google Sign-In
-        function handleCredentialResponse(response) {
+        async function handleCredentialResponse(response) {
             showLoading(true);
             
             try {
@@ -266,6 +268,23 @@
                     showError(`Email no autorizado: ${userData.email}`);
                     showLoading(false);
                     return;
+                }
+
+                // Iniciar sesión en Supabase con el token de Google
+                if (window.supabaseClient?.supabase) {
+                    const { data, error } = await window.supabaseClient.supabase.auth.signInWithIdToken({
+                        provider: 'google',
+                        token: response.credential
+                    });
+                    
+                    if (error) {
+                        console.error('Error al iniciar sesión en Supabase:', error);
+                        showError('Error al iniciar sesión en Supabase');
+                        showLoading(false);
+                        return;
+                    }
+                    
+                    console.log('✓ Sesión de Supabase creada:', data.user.id);
                 }
 
                 // Guardar sesión
