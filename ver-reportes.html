@@ -263,8 +263,22 @@
             }
 
             async init() {
+                // Esperar a que Supabase esté listo
+                await this.waitForSupabase();
                 this.setupEventListeners();
                 await this.loadReportes();
+            }
+
+            async waitForSupabase() {
+                let attempts = 0;
+                while ((!window.supabase || !window.supabase.supabase) && attempts < 20) {
+                    await new Promise(resolve => setTimeout(resolve, 250));
+                    attempts++;
+                }
+                
+                if (!window.supabase || !window.supabase.supabase) {
+                    console.error('Supabase no se cargó después de esperar');
+                }
             }
 
             setupEventListeners() {
