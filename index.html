@@ -754,6 +754,108 @@
                     </div>
                 </section>
 
+                <!-- SECCIÓN: VALORACIÓN DE FUERZA COMPARATIVA -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>VALORACIÓN DE FUERZA COMPARATIVA</h2>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="musculoFuerza">Músculo a evaluar:</label>
+                        <input type="text" id="musculoFuerza" class="form-control" placeholder="Ej: Cuádriceps">
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Medición</th>
+                                    <th style="text-align: center;">Izquierda</th>
+                                    <th style="text-align: center;">Derecha</th>
+                                    <th style="text-align: center;">Asimetría (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Fuerza Max 179°</strong></td>
+                                    <td><input type="number" id="fuerzaMaxIzq" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                    <td><input type="number" id="fuerzaMaxDer" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                    <td><input type="number" id="fuerzaMaxAsim" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RFD 179°</strong></td>
+                                    <td><input type="number" id="rfdIzq" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                    <td><input type="number" id="rfdDer" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                    <td><input type="number" id="rfdAsim" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fatiga 179°</strong></td>
+                                    <td><input type="number" id="fatigaIzq" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                    <td><input type="number" id="fatigaDer" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                    <td><input type="number" id="fatigaAsim" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button type="button" class="btn btn-info" id="addFuerzaBtn" style="margin-top: 15px;">
+                        <span>➕</span> Agregar Valoración de Fuerza
+                    </button>
+
+                    <!-- Lista de valoraciones agregadas -->
+                    <div id="fuerzaList" style="margin-top: 20px;"></div>
+                    <input type="hidden" id="fuerzaComparativaData" name="fuerzaComparativaData">
+                </section>
+
+                <!-- SECCIÓN: VALORACIÓN RANGO ACTIVO DE MOVIMIENTO -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>VALORACIÓN RANGO ACTIVO Y PASIVO DE MOVIMIENTO</h2>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="articulacionRAM">Articulación a evaluar:</label>
+                        <input type="text" id="articulacionRAM" class="form-control" placeholder="Ej: Rodilla">
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Medición</th>
+                                    <th style="text-align: center;">Izquierda</th>
+                                    <th style="text-align: center;">Derecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Ángulo máximo Activo 178°</strong></td>
+                                    <td><input type="number" id="anguloMaxIzq" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                    <td><input type="number" id="anguloMaxDer" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Velocidad RAD 179°</strong></td>
+                                    <td><input type="number" id="velocidadRADIzq" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                    <td><input type="number" id="velocidadRADDer" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                </tr>
+                                <tr style="border-top: 2px solid #00C8D4;">
+                                    <td><strong>Ángulo máximo Pasivo 179°</strong></td>
+                                    <td><input type="number" id="anguloPasivoIzq" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                    <td><input type="number" id="anguloPasivoDer" class="salto-input" step="0.1" placeholder="0.0"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button type="button" class="btn btn-info" id="addRAMBtn" style="margin-top: 15px;">
+                        <span>➕</span> Agregar Valoración de Movimiento
+                    </button>
+
+                    <!-- Lista de valoraciones agregadas -->
+                    <div id="ramList" style="margin-top: 20px;"></div>
+                    <input type="hidden" id="rangoActivoData" name="rangoActivoData">
+                </section>
+
                 <!-- BOTONES DE ACCIÓN -->
                 <section class="action-section">
                     <div class="button-group">

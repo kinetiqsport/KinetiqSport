@@ -1,5 +1,5 @@
 // Importar librería oficial de Supabase
-const { createClient } = window.supabase || {};
+let createClient = null;
 
 // Configuración de Supabase
 const SUPABASE_CONFIG = {
@@ -7,21 +7,46 @@ const SUPABASE_CONFIG = {
     anonKey: window.SUPABASE_ANON_KEY || ''
 };
 
-// Cargar librería de Supabase si no está disponible
-if (!window.supabase) {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    script.onload = () => {
-        window.supabaseLoaded = true;
-    };
-    document.head.appendChild(script);
+// Cargar la librería del CDN de forma controlada
+function loadSupabaseLibrary() {
+    return new Promise((resolve, reject) => {
+        // Verificar si ya está cargada
+        if (window.supabase?.createClient) {
+            resolve();
+            return;
+        }
+        
+        // Crear script tag
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+        script.onload = () => {
+            console.log('✓ Librería Supabase cargada del CDN');
+            resolve();
+        };
+        script.onerror = () => {
+            console.error('❌ Error cargando librería Supabase del CDN');
+            reject(new Error('No se pudo cargar Supabase del CDN'));
+        };
+        document.head.appendChild(script);
+    });
 }
+
+// La librería se carga desde el CDN, se debe esperar a que esté lista
+// El CDN carga a window.supabase.createClient
 
 class SupabaseClient {
     constructor() {
-        this.supabase = window.supabase?.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-        if (!this.supabase) {
-            console.error('Supabase no cargado correctamente');
+        try {
+            // La librería del CDN expone createClient en window.supabase
+            if (!window.supabase || !window.supabase.createClient) {
+                throw new Error('Supabase.createClient no disponible en window.supabase');
+            }
+            
+            this.supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+            console.log('✓ Supabase conectado correctamente');
+        } catch (error) {
+            console.error('Error inicializando Supabase:', error);
+            this.supabase = null;
         }
     }
 
@@ -86,14 +111,51 @@ class SupabaseClient {
             throw error;
         }
     }
+
+    async getCurrentUser() {
+        try {
+            const { data: { user }, error } = await this.supabase.auth.getUser();
+            if (error || !user) {
+                console.warn('No hay usuario autenticado:', error);
+                return null;
+            }
+            return user;
+        } catch (error) {
+            console.error('Error obteniendo usuario:', error);
+            return null;
+        }
+    }
 }
 
 // Instancia global con delay para asegurar carga de librería
-window.supabase = new SupabaseClient();
-
-// Reintentar si Supabase aún no está listo
-setTimeout(() => {
-    if (!window.supabase.supabase && window.supabase?.createClient) {
-        window.supabase = new SupabaseClient();
+async function initSupabaseClient() {
+    try {
+        // Cargar la librería del CDN primero
+        await loadSupabaseLibrary();
+        
+        // Verificar que createClient esté disponible en window.supabase
+        if (!window.supabase?.createClient) {
+            console.error('❌ window.supabase.createClient no disponible después de cargar CDN');
+            setTimeout(initSupabaseClient, 500);
+            return;
+        }
+        
+        if (window.supabaseClient) {
+            return; // Ya está inicializado
+        }
+        
+        window.supabaseClient = new SupabaseClient();
+    } catch (error) {
+        console.error('❌ Error inicializando SupabaseClient:', error);
+        setTimeout(initSupabaseClient, 1000);
     }
-}, 1000);
+}
+
+// Esperar a que el DOM esté listo Y que la librería esté cargada
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        initSupabaseClient();
+    });
+} else {
+    initSupabaseClient();
+}

@@ -263,8 +263,22 @@
             }
 
             async init() {
+                // Esperar a que Supabase esté listo
+                await this.waitForSupabase();
                 this.setupEventListeners();
                 await this.loadReportes();
+            }
+
+            async waitForSupabase() {
+                let attempts = 0;
+                while ((!window.supabaseClient || !window.supabaseClient.supabase) && attempts < 20) {
+                    await new Promise(resolve => setTimeout(resolve, 250));
+                    attempts++;
+                }
+                
+                if (!window.supabaseClient || !window.supabaseClient.supabase) {
+                    console.error('Supabase no se cargó después de esperar');
+                }
             }
 
             setupEventListeners() {
@@ -279,12 +293,12 @@
 
             async loadReportes() {
                 try {
-                    if (!window.supabase || !window.supabase.apiKey) {
+                    if (!window.supabaseClient || !window.supabaseClient.supabase) {
                         this.showError('Error: Supabase no está configurado correctamente');
                         return;
                     }
 
-                    this.allReportes = await window.supabase.getAllReportes();
+                    this.allReportes = await window.supabaseClient.getAllReportes();
                     this.totalReportesEl.textContent = this.allReportes.length;
                     this.renderReportes(this.allReportes);
                 } catch (error) {

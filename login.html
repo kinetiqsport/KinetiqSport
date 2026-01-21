@@ -210,8 +210,10 @@
     </div>
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="supabase-secrets.js"></script>
+    <script src="supabase-config.js"></script>
     <script src="google-auth-config.js"></script>
-    <script src="authorized-emails.js"></script>
+    <!-- authorized-emails.js ya no se usa - ahora se valida contra Supabase -->
     <script>
         const googleLoginBtn = document.getElementById('googleLoginBtn');
         const errorMessage = document.getElementById('errorMessage');
@@ -248,7 +250,7 @@
         }
 
         // Callback para Google Sign-In
-        function handleCredentialResponse(response) {
+        async function handleCredentialResponse(response) {
             showLoading(true);
             
             try {
@@ -260,12 +262,38 @@
                 );
                 const userData = JSON.parse(jsonPayload);
 
-                // Verificar que el email esté en la lista autorizada
-                const authorizedEmails = (window.AUTHORIZED_EMAILS || '').split(',').map(e => e.trim());
-                if (!authorizedEmails.includes(userData.email)) {
-                    showError(`Email no autorizado: ${userData.email}`);
-                    showLoading(false);
-                    return;
+                // Verificar que el email esté en la tabla allowed_users de Supabase
+                if (window.supabaseClient?.supabase) {
+                    const { data: allowedUser, error: checkError } = await window.supabaseClient.supabase
+                        .from('allowed_users')
+                        .select('email')
+                        .eq('email', userData.email)
+                        .single();
+                    
+                    if (checkError || !allowedUser) {
+                        showError(`Email no autorizado: ${userData.email}`);
+                        showLoading(false);
+                        return;
+                    }
+                    
+                    console.log('✓ Email autorizado:', userData.email);
+                }
+
+                // Iniciar sesión en Supabase con el token de Google
+                if (window.supabaseClient?.supabase) {
+                    const { data, error } = await window.supabaseClient.supabase.auth.signInWithIdToken({
+                        provider: 'google',
+                        token: response.credential
+                    });
+                    
+                    if (error) {
+                        console.error('Error al iniciar sesión en Supabase:', error);
+                        showError('Error al iniciar sesión en Supabase');
+                        showLoading(false);
+                        return;
+                    }
+                    
+                    console.log('✓ Sesión de Supabase creada:', data.user.id);
                 }
 
                 // Guardar sesión
