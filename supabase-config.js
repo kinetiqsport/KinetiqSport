@@ -11,9 +11,6 @@ const SUPABASE_CONFIG = {
 if (!window.supabase) {
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    script.onload = () => {
-        window.supabaseLoaded = true;
-    };
     document.head.appendChild(script);
 }
 
@@ -103,11 +100,20 @@ class SupabaseClient {
 }
 
 // Instancia global con delay para asegurar carga de librería
-window.supabase = new SupabaseClient();
-
-// Reintentar si Supabase aún no está listo
-setTimeout(() => {
-    if (!window.supabase.supabase && window.supabase?.createClient) {
-        window.supabase = new SupabaseClient();
+function initSupabaseClient() {
+    if (!window.supabase || !window.supabase.createClient) {
+        // Si Supabase aún no está listo, reintentar
+        setTimeout(initSupabaseClient, 500);
+        return;
     }
-}, 1000);
+    
+    window.supabase = new SupabaseClient();
+    console.log('SupabaseClient inicializado correctamente');
+}
+
+// Esperar a que el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSupabaseClient);
+} else {
+    initSupabaseClient();
+}
