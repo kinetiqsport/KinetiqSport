@@ -279,7 +279,7 @@
 
             async loadReportes() {
                 try {
-                    if (!window.supabase || !window.supabase.apiKey) {
+                    if (!window.supabase || !window.supabase.supabase) {
                         this.showError('Error: Supabase no está configurado correctamente');
                         return;
                     }
