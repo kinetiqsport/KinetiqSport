@@ -86,6 +86,20 @@ class SupabaseClient {
             throw error;
         }
     }
+
+    async getCurrentUser() {
+        try {
+            const { data: { user }, error } = await this.supabase.auth.getUser();
+            if (error || !user) {
+                console.warn('No hay usuario autenticado:', error);
+                return null;
+            }
+            return user;
+        } catch (error) {
+            console.error('Error obteniendo usuario:', error);
+            return null;
+        }
+    }
 }
 
 // Instancia global con delay para asegurar carga de librería

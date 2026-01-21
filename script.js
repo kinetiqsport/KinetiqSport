@@ -29,6 +29,7 @@ class ReporteMedico {
         this.setReportDate();
         this.calculateIMC();
         this.checkImportedDataFromStorage();
+        this.initMultipleValoraciones();
         console.log('ReporteMedico inicializado');
     }
 
@@ -612,11 +613,20 @@ class ReporteMedico {
             // Obtener todos los datos del formulario
             const reporteData = this.collectFormData();
 
+            // Obtener el usuario autenticado
+            const currentUser = await window.supabase.getCurrentUser();
+            const userId = currentUser?.id;
+
+            if (!userId) {
+                console.warn('No hay usuario autenticado, no se puede guardar user_id');
+            }
+
             // Preparar datos para Supabase
             const dataToSave = {
                 cedula: cedula,
                 nombre: nombre,
                 apellido: apellido,
+                user_id: userId || null,
                 reporte_json: reporteData,
                 fecha_modificacion: new Date().toISOString()
             };
@@ -887,8 +897,8 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['IZQUIERDA:', (document.getElementById('areaElipseIzq')?.value || '-') + ' CM²', 
-                     'DERECHA:', (document.getElementById('areaElipseDer')?.value || '-') + ' CM²']
+                    ['Izquierda:', (document.getElementById('areaElipseIzq')?.value || '-') + ' CM²', 
+                     'Derecha:', (document.getElementById('areaElipseDer')?.value || '-') + ' CM²']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -905,7 +915,7 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['ASIMETRÍA:', (document.getElementById('areaElipseAsim')?.value || '-') + ' %']
+                    ['Asimetría:', (document.getElementById('areaElipseAsim')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -927,8 +937,8 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['IZQUIERDA:', (document.getElementById('desvIntIzq')?.value || '-') + ' %', 
-                     'DERECHA:', (document.getElementById('desvIntDer')?.value || '-') + ' %']
+                    ['Izquierda:', (document.getElementById('desvIntIzq')?.value || '-') + ' %', 
+                     'Derecha:', (document.getElementById('desvIntDer')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -945,7 +955,7 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['ASIMETRÍA:', (document.getElementById('desvIntAsim')?.value || '-') + ' %']
+                    ['Asimetría:', (document.getElementById('desvIntAsim')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -967,8 +977,8 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['IZQUIERDA:', (document.getElementById('bipodLateralIzq')?.value || '-') + ' CM²', 
-                     'DERECHA:', (document.getElementById('bipodLateralDer')?.value || '-') + ' CM²']
+                    ['Izquierda:', (document.getElementById('bipodLateralIzq')?.value || '-') + ' CM²', 
+                     'Derecha:', (document.getElementById('bipodLateralDer')?.value || '-') + ' CM²']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -985,7 +995,7 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['ASIMETRÍA:', (document.getElementById('bipodLateralAsim')?.value || '-') + ' %']
+                    ['Asimetría:', (document.getElementById('bipodLateralAsim')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1007,10 +1017,10 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['TALÓN IZQ:', (document.getElementById('distPesoTalonIzq')?.value || '-') + ' %', 
-                     'TALÓN DER:', (document.getElementById('distPesoTalonDer')?.value || '-') + ' %'],
-                    ['DEDOS IZQ:', (document.getElementById('distPesoDedosIzq')?.value || '-') + ' %',
-                     'DEDOS DER:', (document.getElementById('distPesoDedosDer')?.value || '-') + ' %']
+                    ['Talón izq:', (document.getElementById('distPesoTalonIzq')?.value || '-') + ' %', 
+                     'Talón der:', (document.getElementById('distPesoTalonDer')?.value || '-') + ' %'],
+                    ['Dedos izq:', (document.getElementById('distPesoDedosIzq')?.value || '-') + ' %',
+                     'Dedos der:', (document.getElementById('distPesoDedosDer')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1034,8 +1044,8 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['IZQUIERDA:', (document.getElementById('asimAmpTalonDedosIzq')?.value || '-') + ' %', 
-                     'DERECHA:', (document.getElementById('asimAmpTalonDedosDer')?.value || '-') + ' %']
+                    ['Izquierda:', (document.getElementById('asimAmpTalonDedosIzq')?.value || '-') + ' %', 
+                     'Derecha:', (document.getElementById('asimAmpTalonDedosDer')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1064,8 +1074,8 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['IZQUIERDA:', (document.getElementById('areaElipseIzqCC')?.value || '-') + ' CM²', 
-                     'DERECHA:', (document.getElementById('areaElipseDerCC')?.value || '-') + ' CM²']
+                    ['Izquierda:', (document.getElementById('areaElipseIzqCC')?.value || '-') + ' CM²', 
+                     'Derecha:', (document.getElementById('areaElipseDerCC')?.value || '-') + ' CM²']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1082,7 +1092,7 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['ASIMETRÍA:', (document.getElementById('areaElipseAsimCC')?.value || '-') + ' %']
+                    ['Asimetría:', (document.getElementById('areaElipseAsimCC')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1104,8 +1114,8 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['IZQUIERDA:', (document.getElementById('desvIntIzqCC')?.value || '-') + ' %', 
-                     'DERECHA:', (document.getElementById('desvIntDerCC')?.value || '-') + ' %']
+                    ['Izquierda:', (document.getElementById('desvIntIzqCC')?.value || '-') + ' %', 
+                     'Derecha:', (document.getElementById('desvIntDerCC')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1122,7 +1132,7 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['ASIMETRÍA:', (document.getElementById('desvIntAsimCC')?.value || '-') + ' %']
+                    ['Asimetría:', (document.getElementById('desvIntAsimCC')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1144,8 +1154,8 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['IZQUIERDA:', (document.getElementById('bipodLateralIzqCC')?.value || '-') + ' CM²', 
-                     'DERECHA:', (document.getElementById('bipodLateralDerCC')?.value || '-') + ' CM²']
+                    ['Izquierda:', (document.getElementById('bipodLateralIzqCC')?.value || '-') + ' CM²', 
+                     'Derecha:', (document.getElementById('bipodLateralDerCC')?.value || '-') + ' CM²']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1162,7 +1172,7 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['ASIMETRÍA:', (document.getElementById('bipodLateralAsimCC')?.value || '-') + ' %']
+                    ['Asimetría:', (document.getElementById('bipodLateralAsimCC')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1184,10 +1194,10 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['TALÓN IZQ (%):', document.getElementById('distPesoTalonIzqCC')?.value || '-', 
-                     'TALÓN DER (%):', document.getElementById('distPesoTalonDerCC')?.value || '-'],
-                    ['DEDOS IZQ (%):', document.getElementById('distPesoDedosIzqCC')?.value || '-',
-                     'DEDOS DER (%):', document.getElementById('distPesoDedosDerCC')?.value || '-']
+                    ['Talón izq:', (document.getElementById('distPesoTalonIzqCC')?.value || '-') + ' %', 
+                     'Talón der:', (document.getElementById('distPesoTalonDerCC')?.value || '-') + ' %'],
+                    ['Dedos izq:', (document.getElementById('distPesoDedosIzqCC')?.value || '-') + ' %',
+                     'Dedos der:', (document.getElementById('distPesoDedosDerCC')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1211,8 +1221,8 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['IZQUIERDA (%):', document.getElementById('asimAmpTalonDedosIzqCC')?.value || '-', 
-                     'DERECHA (%):', document.getElementById('asimAmpTalonDedosDerCC')?.value || '-']
+                    ['Izquierda:', (document.getElementById('asimAmpTalonDedosIzqCC')?.value || '-') + ' %', 
+                     'Derecha:', (document.getElementById('asimAmpTalonDedosDerCC')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1242,14 +1252,20 @@ class ReporteMedico {
                  document.querySelector('input[data-unipodal="punta"][data-col="der"]')?.value || '-',
                  document.querySelector('input[data-unipodal="punta"][data-col="asim"]')?.value || '-']
             ];
-
             doc.autoTable({
                 startY: yPos,
                 head: [['Posición', 'Izquierda (%)', 'Derecha (%)', 'Asimetría (%)']],
                 body: unipodalBody,
-                theme: 'grid',
-                styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2, halign: 'center' },
-                headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' }
+                theme: 'striped',
+                styles: { fontSize: 8.5, cellPadding: 3, textColor: textDark },
+                headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontSize: 9, fontStyle: 'bold', halign: 'center' },
+                columnStyles: {
+                    0: { fontStyle: 'bold', cellWidth: 50, halign: 'center' },
+                    1: { halign: 'center', cellWidth: 47 },
+                    2: { halign: 'center', cellWidth: 47 },
+                    3: { halign: 'center', cellWidth: 46 }
+                },
+                margin: { right: 15 }
             });
 
             yPos = doc.lastAutoTable.finalY + 10;
@@ -1270,20 +1286,21 @@ class ReporteMedico {
 
             doc.autoTable({
                 startY: yPos,
-                head: [['ZONA', 'IZQUIERDO', 'DERECHO']],
+                head: [['Zona', 'Izquierdo', 'Derecho']],
                 body: [
                     ['Anterior', uniAnteriorIzq, uniAnteriorDer],
                     ['Medial', uniMedialIzq, uniMedialDer],
                     ['Posterior', uniPosteriorIzq, uniPosteriorDer]
                 ],
-                theme: 'grid',
-                styles: { fontSize: 11, cellPadding: 5, textColor: textDark, lineColor: borderColor, lineWidth: 0.2, halign: 'center', valign: 'middle' },
-                headStyles: { fillColor: accentColor, textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center', fontSize: 11 },
+                theme: 'striped',
+                styles: { fontSize: 8.5, cellPadding: 3, textColor: textDark, halign: 'center' },
+                headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontSize: 9, fontStyle: 'bold', halign: 'center' },
                 columnStyles: {
-                    0: { fontStyle: 'bold', textColor: primaryColor, cellWidth: 50, fontSize: 10 },
-                    1: { cellWidth: 70, fontSize: 11, fontStyle: 'bold' },
-                    2: { cellWidth: 70, fontSize: 11, fontStyle: 'bold' }
-                }
+                    0: { fontStyle: 'bold', cellWidth: 65, halign: 'center' },
+                    1: { halign: 'center', cellWidth: 62 },
+                    2: { halign: 'center', cellWidth: 63 }
+                },
+                margin: { right: 15 }
             });
 
             // ==================== PÁGINA 6: SENTADILLA Y FLEXIONES ====================
@@ -1296,7 +1313,7 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['NÚMERO DE SENTADILLAS:', document.getElementById('sentNumSentadillas')?.value || '-']
+                    ['Número de sentadillas:', document.getElementById('sentNumSentadillas')?.value || '-']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9.5, cellPadding: 5, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1311,8 +1328,8 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['DISTRIBUCIÓN PESO IZQ:', (document.getElementById('sentDistPesoIzq')?.value || '-') + ' %', 'DISTRIBUCIÓN PESO DER:', (document.getElementById('sentDistPesoDer')?.value || '-') + ' %'],
-                    ['FUERZA IZQ:', (document.getElementById('sentFuerzaIzqKg')?.value || '-') + ' Kg', 'FUERZA DER:', (document.getElementById('sentFuerzaDerKg')?.value || '-') + ' Kg']
+                    ['Distribución peso izq:', (document.getElementById('sentDistPesoIzq')?.value || '-') + ' %', 'Distribución peso der:', (document.getElementById('sentDistPesoDer')?.value || '-') + ' %'],
+                    ['Fuerza izq:', (document.getElementById('sentFuerzaIzqKg')?.value || '-') + ' Kg', 'Fuerza der:', (document.getElementById('sentFuerzaDerKg')?.value || '-') + ' Kg']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9.5, cellPadding: 5, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1329,7 +1346,7 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['ASIMETRÍA:', (document.getElementById('sentAsimPorcentaje')?.value || '-') + ' %']
+                    ['Asimetría:', (document.getElementById('sentAsimPorcentaje')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9.5, cellPadding: 5, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1347,7 +1364,7 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['NÚMERO DE REPETICIONES:', document.getElementById('flexNumReps')?.value || '-']
+                    ['Número de repeticiones:', document.getElementById('flexNumReps')?.value || '-']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9.5, cellPadding: 5, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1362,8 +1379,8 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['DISTRIBUCIÓN PESO IZQ:', (document.getElementById('flexDistPesoIzq')?.value || '-') + ' %', 'DISTRIBUCIÓN PESO DER:', (document.getElementById('flexDistPesoDer')?.value || '-') + ' %'],
-                    ['FUERZA IZQ:', (document.getElementById('flexFuerzaIzqKg')?.value || '-') + ' Kg', 'FUERZA DER:', (document.getElementById('flexFuerzaDerKg')?.value || '-') + ' Kg']
+                    ['Distribución peso izq:', (document.getElementById('flexDistPesoIzq')?.value || '-') + ' %', 'Distribución peso der:', (document.getElementById('flexDistPesoDer')?.value || '-') + ' %'],
+                    ['Fuerza izq:', (document.getElementById('flexFuerzaIzqKg')?.value || '-') + ' Kg', 'Fuerza der:', (document.getElementById('flexFuerzaDerKg')?.value || '-') + ' Kg']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9.5, cellPadding: 5, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1380,7 +1397,7 @@ class ReporteMedico {
             doc.autoTable({
                 startY: yPos,
                 body: [
-                    ['ASIMETRÍA:', (document.getElementById('flexAsimPorcentaje')?.value || '-') + ' %']
+                    ['Asimetría:', (document.getElementById('flexAsimPorcentaje')?.value || '-') + ' %']
                 ],
                 theme: 'plain',
                 styles: { fontSize: 9.5, cellPadding: 5, textColor: textDark, lineColor: borderColor, lineWidth: 0.2 },
@@ -1414,9 +1431,21 @@ class ReporteMedico {
                 startY: yPos,
                 head: [['Test', 'Peso', 'Altura', 'Vel.', 'T.Vuelo', 'Q', 'Caída', 'N', 'RFD']],
                 body: saltosBody,
-                theme: 'grid',
-                styles: { fontSize: 7.5, cellPadding: 2, textColor: textDark, lineColor: borderColor, lineWidth: 0.2, halign: 'center' },
-                headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' }
+                theme: 'striped',
+                styles: { fontSize: 8.5, cellPadding: 3, textColor: textDark, halign: 'center' },
+                headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontSize: 9, fontStyle: 'bold', halign: 'center' },
+                columnStyles: {
+                    0: { fontStyle: 'bold', cellWidth: 30 },
+                    1: { halign: 'center', cellWidth: 22 },
+                    2: { halign: 'center', cellWidth: 22 },
+                    3: { halign: 'center', cellWidth: 20 },
+                    4: { halign: 'center', cellWidth: 22 },
+                    5: { halign: 'center', cellWidth: 18 },
+                    6: { halign: 'center', cellWidth: 20 },
+                    7: { halign: 'center', cellWidth: 18 },
+                    8: { halign: 'center', cellWidth: 18 }
+                },
+                margin: { right: 15 }
             });
 
             yPos = doc.lastAutoTable.finalY + 10;
@@ -1456,6 +1485,109 @@ class ReporteMedico {
             });
 
             yPos = doc.lastAutoTable.finalY + 10;
+
+            // ==================== VALORACIÓN DE FUERZA COMPARATIVA ====================
+            if (this.fuerzaComparativaList && this.fuerzaComparativaList.length > 0) {
+                if (yPos > 240) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+
+                this.addSectionHeader(doc, 'VALORACIÓN DE FUERZA COMPARATIVA', yPos, primaryColor, accentColor);
+                yPos += 12;
+
+                this.fuerzaComparativaList.forEach((valoracion, index) => {
+                    if (yPos > 240) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+
+                    doc.setFontSize(9);
+                    doc.setTextColor(...primaryColor);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`Músculo: ${valoracion.musculo}`, 15, yPos);
+                    yPos += 7;
+
+                    doc.autoTable({
+                        startY: yPos,
+                        head: [['Medición', 'Izquierda', 'Derecha', 'Asimetría (%)']],
+                        body: [
+                            ['Fuerza Max 179°', valoracion.fuerzaMax.izq || '-', valoracion.fuerzaMax.der || '-', valoracion.fuerzaMax.asim || '-'],
+                            ['RFD 179°', valoracion.rfd.izq || '-', valoracion.rfd.der || '-', valoracion.rfd.asim || '-'],
+                            ['Fatiga 179°', valoracion.fatiga.izq || '-', valoracion.fatiga.der || '-', valoracion.fatiga.asim || '-']
+                        ],
+                        theme: 'striped',
+                        headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontSize: 9, fontStyle: 'bold', halign: 'center' },
+                        styles: { fontSize: 8.5, cellPadding: 3, textColor: textDark, halign: 'center' },
+                        columnStyles: {
+                            0: { fontStyle: 'bold', cellWidth: 50, halign: 'center' },
+                            1: { halign: 'center', cellWidth: 47 },
+                            2: { halign: 'center', cellWidth: 47 },
+                            3: { halign: 'center', cellWidth: 46 }
+                        },
+                        margin: { right: 15 }
+                    });
+
+                    yPos = doc.lastAutoTable.finalY + 6;
+                });
+
+                yPos += 4;
+            }
+
+            // ==================== VALORACIÓN RANGO ACTIVO Y PASIVO DE MOVIMIENTO ====================
+            if (this.rangoActivoList && this.rangoActivoList.length > 0) {
+                // Si hay datos de fuerza comparativa, siempre iniciar en nueva página
+                if (this.fuerzaComparativaList && this.fuerzaComparativaList.length > 0) {
+                    doc.addPage();
+                    yPos = 20;
+                } else if (yPos > 240) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+
+                this.addSectionHeader(doc, 'VALORACIÓN RANGO ACTIVO Y PASIVO DE MOVIMIENTO', yPos, primaryColor, accentColor);
+                yPos += 12;
+
+                this.rangoActivoList.forEach((valoracion, index) => {
+                    if (yPos > 240) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+
+                    doc.setFontSize(9);
+                    doc.setTextColor(...primaryColor);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`Articulación: ${valoracion.articulacion}`, 15, yPos);
+                    yPos += 8;
+
+                    doc.autoTable({
+                        startY: yPos,
+                        head: [['Medición', 'Izquierda', 'Derecha']],
+                        body: [
+                            ['Ángulo máximo Activo 178°', (valoracion.anguloMax.izq || '-') + '°', (valoracion.anguloMax.der || '-') + '°'],
+                            ['Velocidad RAD 179°', valoracion.velocidadRAD.izq || '-', valoracion.velocidadRAD.der || '-'],
+                            ['Ángulo máximo Pasivo 179°', (valoracion.anguloPasivo?.izq || '-') + '°', (valoracion.anguloPasivo?.der || '-') + '°']
+                        ],
+                        theme: 'striped',
+                        headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontSize: 9, fontStyle: 'bold', halign: 'center' },
+                        styles: { fontSize: 8.5, cellPadding: 3, textColor: textDark, halign: 'center' },
+                        bodyStyles: {
+                            2: { fillColor: [245, 253, 255] } // Fondo para fila pasiva
+                        },
+                        columnStyles: {
+                            0: { fontStyle: 'bold', cellWidth: 70, halign: 'center' },
+                            1: { halign: 'center', cellWidth: 60 },
+                            2: { halign: 'center', cellWidth: 60 }
+                        },
+                        margin: { right: 15 }
+                    });
+
+                    yPos = doc.lastAutoTable.finalY + 6;
+                });
+
+                yPos += 4;
+            }
+
 
             // OBSERVACIONES FINALES
             this.addSectionHeader(doc, 'OBSERVACIONES FINALES', yPos, primaryColor, accentColor);
@@ -1511,8 +1643,9 @@ class ReporteMedico {
     }
 
     addSectionHeader(doc, title, yPos, primaryColor, accentColor) {
+        // Ancho total para cubrir todo el ancho útil del documento
         doc.setFillColor(245, 248, 250);
-        doc.rect(10, yPos, 190, 8, 'F');
+        doc.rect(10, yPos, 194, 8, 'F');
         
         doc.setFillColor(...accentColor);
         doc.rect(10, yPos, 3, 8, 'F');
@@ -1536,11 +1669,291 @@ class ReporteMedico {
             setTimeout(() => alertDiv.remove(), 300);
         }, 3000);
     }
+
+    // =========================================================================
+    // SISTEMA DE MÚLTIPLES VALORACIONES
+    // =========================================================================
+    initMultipleValoraciones() {
+        this.fuerzaComparativaList = [];
+        this.rangoActivoList = [];
+
+        // Botón Agregar Fuerza Comparativa
+        const addFuerzaBtn = document.getElementById('addFuerzaBtn');
+        if (addFuerzaBtn) {
+            addFuerzaBtn.addEventListener('click', () => this.agregarFuerzaComparativa());
+        }
+
+        // Botón Agregar Rango Activo
+        const addRAMBtn = document.getElementById('addRAMBtn');
+        if (addRAMBtn) {
+            addRAMBtn.addEventListener('click', () => this.agregarRangoActivo());
+        }
+
+        // Validación de solo números para inputs de fuerza
+        const fuerzaInputs = [
+            'fuerzaMaxIzq', 'fuerzaMaxDer', 'fuerzaMaxAsim',
+            'rfdIzq', 'rfdDer', 'rfdAsim',
+            'fatigaIzq', 'fatigaDer', 'fatigaAsim'
+        ];
+        fuerzaInputs.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('input', () => {
+                    this.restrictToNumbers(input, true);
+                });
+            }
+        });
+
+        // Validación de solo números para inputs de rango activo
+        const ramInputs = ['anguloMaxIzq', 'anguloMaxDer', 'velocidadRADIzq', 'velocidadRADDer'];
+        ramInputs.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('input', () => {
+                    this.restrictToNumbers(input, true);
+                });
+            }
+        });
+
+        // Validación para pasivo también
+        const pasivoInputs = ['anguloPasivoIzq', 'anguloPasivoDer'];
+        pasivoInputs.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('input', () => {
+                    this.restrictToNumbers(input, true);
+                });
+            }
+        });
+    }
+
+    agregarFuerzaComparativa() {
+        const musculo = document.getElementById('musculoFuerza').value.trim();
+        const fuerzaMaxIzq = document.getElementById('fuerzaMaxIzq').value;
+        const fuerzaMaxDer = document.getElementById('fuerzaMaxDer').value;
+        const fuerzaMaxAsim = document.getElementById('fuerzaMaxAsim').value;
+        const rfdIzq = document.getElementById('rfdIzq').value;
+        const rfdDer = document.getElementById('rfdDer').value;
+        const rfdAsim = document.getElementById('rfdAsim').value;
+        const fatigaIzq = document.getElementById('fatigaIzq').value;
+        const fatigaDer = document.getElementById('fatigaDer').value;
+        const fatigaAsim = document.getElementById('fatigaAsim').value;
+
+        if (!musculo) {
+            this.showAlert('⚠️ Ingresa el nombre del músculo', 'warning');
+            return;
+        }
+
+        const valoracion = {
+            musculo,
+            fuerzaMax: { izq: fuerzaMaxIzq, der: fuerzaMaxDer, asim: fuerzaMaxAsim },
+            rfd: { izq: rfdIzq, der: rfdDer, asim: rfdAsim },
+            fatiga: { izq: fatigaIzq, der: fatigaDer, asim: fatigaAsim }
+        };
+
+        this.fuerzaComparativaList.push(valoracion);
+        this.renderFuerzaList();
+        this.limpiarCamposFuerza();
+        this.showAlert('✓ Valoración de fuerza agregada', 'success');
+
+        // Guardar en hidden input
+        document.getElementById('fuerzaComparativaData').value = JSON.stringify(this.fuerzaComparativaList);
+    }
+
+    agregarRangoActivo() {
+        const articulacion = document.getElementById('articulacionRAM').value.trim();
+        const anguloMaxIzq = document.getElementById('anguloMaxIzq').value;
+        const anguloMaxDer = document.getElementById('anguloMaxDer').value;
+        const velocidadRADIzq = document.getElementById('velocidadRADIzq').value;
+        const velocidadRADDer = document.getElementById('velocidadRADDer').value;
+        const anguloPasivoIzq = document.getElementById('anguloPasivoIzq').value;
+        const anguloPasivoDer = document.getElementById('anguloPasivoDer').value;
+
+        if (!articulacion) {
+            this.showAlert('⚠️ Ingresa el nombre de la articulación', 'warning');
+            return;
+        }
+
+        const valoracion = {
+            articulacion,
+            anguloMax: { izq: anguloMaxIzq, der: anguloMaxDer },
+            velocidadRAD: { izq: velocidadRADIzq, der: velocidadRADDer },
+            anguloPasivo: { izq: anguloPasivoIzq, der: anguloPasivoDer }
+        };
+
+        this.rangoActivoList.push(valoracion);
+        this.renderRAMList();
+        this.limpiarCamposRAM();
+        this.showAlert('✓ Valoración de movimiento agregada', 'success');
+
+        // Guardar en hidden input
+        document.getElementById('rangoActivoData').value = JSON.stringify(this.rangoActivoList);
+    }
+
+    renderFuerzaList() {
+        const listContainer = document.getElementById('fuerzaList');
+        if (!listContainer) return;
+
+        if (this.fuerzaComparativaList.length === 0) {
+            listContainer.innerHTML = '';
+            return;
+        }
+
+        let html = '<div style="margin-top: 20px;"><h3 style="color: #003A5D; font-size: 16px; margin-bottom: 10px;">Valoraciones Agregadas:</h3>';
+        
+        this.fuerzaComparativaList.forEach((val, index) => {
+            html += `
+                <div style="background: #f7fbfd; border-left: 4px solid #00C8D4; padding: 15px; margin-bottom: 10px; border-radius: 6px; position: relative;">
+                    <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 5px;">
+                        <button type="button" onclick="reporte.editarFuerza(${index})" 
+                            style="background: #3498db; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 12px;">
+                            ✏️ Editar
+                        </button>
+                        <button type="button" onclick="reporte.eliminarFuerza(${index})" 
+                            style="background: #e74c3c; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 12px;">
+                            🗑️ Eliminar
+                        </button>
+                    </div>
+                    <p style="font-weight: 600; color: #003A5D; margin-bottom: 8px;">Músculo: ${val.musculo}</p>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 13px;">
+                        <div><strong>Fuerza Max:</strong> I:${val.fuerzaMax.izq || '-'} D:${val.fuerzaMax.der || '-'} A:${val.fuerzaMax.asim || '-'}%</div>
+                        <div><strong>RFD:</strong> I:${val.rfd.izq || '-'} D:${val.rfd.der || '-'} A:${val.rfd.asim || '-'}%</div>
+                        <div><strong>Fatiga:</strong> I:${val.fatiga.izq || '-'} D:${val.fatiga.der || '-'} A:${val.fatiga.asim || '-'}%</div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        listContainer.innerHTML = html;
+    }
+
+    renderRAMList() {
+        const listContainer = document.getElementById('ramList');
+        if (!listContainer) return;
+
+        if (this.rangoActivoList.length === 0) {
+            listContainer.innerHTML = '';
+            return;
+        }
+
+        let html = '<div style="margin-top: 20px;"><h3 style="color: #003A5D; font-size: 16px; margin-bottom: 10px;">Valoraciones Agregadas:</h3>';
+        
+        this.rangoActivoList.forEach((val, index) => {
+            html += `
+                <div style="background: #f7fbfd; border-left: 4px solid #00C8D4; padding: 15px; margin-bottom: 10px; border-radius: 6px; position: relative;">
+                    <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 5px;">
+                        <button type="button" onclick="reporte.editarRAM(${index})" 
+                            style="background: #3498db; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 12px;">
+                            ✏️ Editar
+                        </button>
+                        <button type="button" onclick="reporte.eliminarRAM(${index})" 
+                            style="background: #e74c3c; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 12px;">
+                            🗑️ Eliminar
+                        </button>
+                    </div>
+                    <p style="font-weight: 600; color: #003A5D; margin-bottom: 8px;">Articulación: ${val.articulacion}</p>
+                    <div style="font-size: 13px;">
+                        <div style="margin-bottom: 5px;"><strong>Ángulo Activo:</strong> Izq: ${val.anguloMax.izq || '-'}° Der: ${val.anguloMax.der || '-'}°</div>
+                        <div style="margin-bottom: 5px;"><strong>Velocidad RAD:</strong> Izq: ${val.velocidadRAD.izq || '-'} Der: ${val.velocidadRAD.der || '-'}</div>
+                        <div style="border-top: 1px solid #00C8D4; padding-top: 5px; margin-top: 5px;"><strong>Ángulo Pasivo:</strong> Izq: ${val.anguloPasivo.izq || '-'}° Der: ${val.anguloPasivo.der || '-'}°</div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        listContainer.innerHTML = html;
+    }
+
+    editarFuerza(index) {
+        const val = this.fuerzaComparativaList[index];
+        
+        // Cargar datos en los campos
+        document.getElementById('musculoFuerza').value = val.musculo;
+        document.getElementById('fuerzaMaxIzq').value = val.fuerzaMax.izq;
+        document.getElementById('fuerzaMaxDer').value = val.fuerzaMax.der;
+        document.getElementById('fuerzaMaxAsim').value = val.fuerzaMax.asim;
+        document.getElementById('rfdIzq').value = val.rfd.izq;
+        document.getElementById('rfdDer').value = val.rfd.der;
+        document.getElementById('rfdAsim').value = val.rfd.asim;
+        document.getElementById('fatigaIzq').value = val.fatiga.izq;
+        document.getElementById('fatigaDer').value = val.fatiga.der;
+        document.getElementById('fatigaAsim').value = val.fatiga.asim;
+        
+        // Eliminar de la lista (se volverá a agregar al hacer click en Agregar)
+        this.fuerzaComparativaList.splice(index, 1);
+        this.renderFuerzaList();
+        document.getElementById('fuerzaComparativaData').value = JSON.stringify(this.fuerzaComparativaList);
+        
+        // Scroll al formulario
+        document.getElementById('musculoFuerza').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        this.showAlert('✏️ Editando valoración - Modifica y presiona "Agregar"', 'info');
+    }
+
+    editarRAM(index) {
+        const val = this.rangoActivoList[index];
+        
+        // Cargar datos en los campos
+        document.getElementById('articulacionRAM').value = val.articulacion;
+        document.getElementById('anguloMaxIzq').value = val.anguloMax.izq;
+        document.getElementById('anguloMaxDer').value = val.anguloMax.der;
+        document.getElementById('velocidadRADIzq').value = val.velocidadRAD.izq;
+        document.getElementById('anguloPasivoIzq').value = val.anguloPasivo?.izq || '';
+        document.getElementById('anguloPasivoDer').value = val.anguloPasivo?.der || '';
+        document.getElementById('velocidadRADDer').value = val.velocidadRAD.der;
+        
+        // Eliminar de la lista (se volverá a agregar al hacer click en Agregar)
+        this.rangoActivoList.splice(index, 1);
+        this.renderRAMList();
+        document.getElementById('rangoActivoData').value = JSON.stringify(this.rangoActivoList);
+        
+        // Scroll al formulario
+        document.getElementById('articulacionRAM').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        this.showAlert('✏️ Editando valoración - Modifica y presiona "Agregar"', 'info');
+    }
+
+    eliminarFuerza(index) {
+        this.fuerzaComparativaList.splice(index, 1);
+        this.renderFuerzaList();
+        document.getElementById('fuerzaComparativaData').value = JSON.stringify(this.fuerzaComparativaList);
+        this.showAlert('✓ Valoración eliminada', 'success');
+    }
+
+    eliminarRAM(index) {
+        this.rangoActivoList.splice(index, 1);
+        this.renderRAMList();
+        document.getElementById('rangoActivoData').value = JSON.stringify(this.rangoActivoList);
+        this.showAlert('✓ Valoración eliminada', 'success');
+    }
+
+    limpiarCamposFuerza() {
+        document.getElementById('musculoFuerza').value = '';
+        document.getElementById('fuerzaMaxIzq').value = '';
+        document.getElementById('fuerzaMaxDer').value = '';
+        document.getElementById('fuerzaMaxAsim').value = '';
+        document.getElementById('rfdIzq').value = '';
+        document.getElementById('rfdDer').value = '';
+        document.getElementById('rfdAsim').value = '';
+        document.getElementById('fatigaIzq').value = '';
+        document.getElementById('fatigaDer').value = '';
+        document.getElementById('fatigaAsim').value = '';
+    }
+
+    limpiarCamposRAM() {
+        document.getElementById('articulacionRAM').value = '';
+        document.getElementById('anguloMaxIzq').value = '';
+        document.getElementById('anguloMaxDer').value = '';
+        document.getElementById('anguloPasivoIzq').value = '';
+        document.getElementById('anguloPasivoDer').value = '';
+        document.getElementById('velocidadRADIzq').value = '';
+        document.getElementById('velocidadRADDer').value = '';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Script cargado, inicializando ReporteMedico...');
-    const reporte = new ReporteMedico();
+    window.reporte = new ReporteMedico();
     console.log('ReporteMedico inicializado');
 });
 
