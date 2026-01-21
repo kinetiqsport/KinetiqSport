@@ -7,27 +7,22 @@ const SUPABASE_CONFIG = {
     anonKey: window.SUPABASE_ANON_KEY || ''
 };
 
-// Cargar librería de Supabase si no está disponible
-if (!window.supabase) {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    document.head.appendChild(script);
-}
+// La librería se carga desde el CDN, se debe esperar a que esté lista
+// El CDN carga a window.supabase.createClient
 
 class SupabaseClient {
     constructor() {
-        // Obtener createClient de window.supabase
-        const supabaseLib = window.supabase || {};
-        createClient = supabaseLib.createClient;
-        
-        if (!createClient) {
-            console.error('Supabase createClient no disponible');
-            return;
-        }
-        
-        this.supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-        if (!this.supabase) {
-            console.error('Supabase no cargado correctamente');
+        try {
+            // La librería del CDN expone createClient en window.supabase
+            if (!window.supabase || !window.supabase.createClient) {
+                throw new Error('Supabase.createClient no disponible en window.supabase');
+            }
+            
+            this.supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+            console.log('✓ Supabase conectado correctamente');
+        } catch (error) {
+            console.error('Error inicializando Supabase:', error);
+            this.supabase = null;
         }
     }
 
@@ -111,24 +106,29 @@ class SupabaseClient {
 // Instancia global con delay para asegurar carga de librería
 function initSupabaseClient() {
     try {
-        // Verificar que createClient esté disponible
-        if (!window.supabase || typeof window.supabase.createClient !== 'function') {
-            console.log('Supabase no está listo, reintentando en 500ms...');
-            setTimeout(initSupabaseClient, 500);
+        // Verificar que createClient esté disponible en window.supabase
+        if (!window.supabase?.createClient) {
+            console.log('⏳ Esperando que Supabase cargue...');
+            setTimeout(initSupabaseClient, 300);
             return;
         }
         
+        if (window.supabaseClient) {
+            return; // Ya está inicializado
+        }
+        
         window.supabaseClient = new SupabaseClient();
-        console.log('✓ SupabaseClient inicializado correctamente');
     } catch (error) {
-        console.error('Error inicializando SupabaseClient:', error);
+        console.error('❌ Error inicializando SupabaseClient:', error);
         setTimeout(initSupabaseClient, 500);
     }
 }
 
-// Esperar a que el DOM esté listo
+// Esperar a que el DOM esté listo Y que la librería esté cargada
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSupabaseClient);
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initSupabaseClient, 100);
+    });
 } else {
     setTimeout(initSupabaseClient, 100);
 }
