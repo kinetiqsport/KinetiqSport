@@ -298,7 +298,7 @@
                         return;
                     }
 
-                    this.allReportes = await window.supabase.getAllReportes();
+                    this.allReportes = await window.supabaseClient.getAllReportes();
                     this.totalReportesEl.textContent = this.allReportes.length;
                     this.renderReportes(this.allReportes);
                 } catch (error) {
