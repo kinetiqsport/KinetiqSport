@@ -50,23 +50,28 @@ class ReporteMedico {
         console.log('🔍 checkImportedDataFromStorage() llamado');
         const reportToLoad = sessionStorage.getItem('reportToLoad');
         console.log('🔍 reportToLoad:', reportToLoad ? 'SI existe' : 'NO existe');
+        
+        // Cargar adjuntos SIEMPRE, independientemente de si hay error al cargar datos
+        const adjuntosToLoad = sessionStorage.getItem('adjuntosToLoad');
+        console.log('🔍 adjuntosToLoad desde sessionStorage:', adjuntosToLoad);
+        if (adjuntosToLoad) {
+            try {
+                this.adjuntos = JSON.parse(adjuntosToLoad);
+                console.log('✓ Adjuntos cargados:', this.adjuntos);
+                this.mostrarAdjuntosCargados();
+            } catch (err) {
+                console.error('Error parseando adjuntos:', err);
+            }
+            sessionStorage.removeItem('adjuntosToLoad');
+        } else {
+            console.log('❌ No hay adjuntosToLoad en sessionStorage');
+        }
+        
+        // Cargar datos del reporte
         if (reportToLoad) {
             try {
                 const data = JSON.parse(reportToLoad);
                 this.loadDataFromObject(data);
-                
-                // Cargar adjuntos si existen
-                const adjuntosToLoad = sessionStorage.getItem('adjuntosToLoad');
-                console.log('🔍 adjuntosToLoad desde sessionStorage:', adjuntosToLoad);
-                if (adjuntosToLoad) {
-                    this.adjuntos = JSON.parse(adjuntosToLoad);
-                    console.log('Adjuntos parseados:', this.adjuntos);
-                    this.mostrarAdjuntosCargados();
-                    sessionStorage.removeItem('adjuntosToLoad');
-                } else {
-                    console.log('No hay adjuntosToLoad en sessionStorage');
-                }
-                
                 this.showAlert('✓ Reporte cargado correctamente', 'success');
                 sessionStorage.removeItem('reportToLoad');
                 return;
