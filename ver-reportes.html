@@ -494,8 +494,12 @@
                 sessionStorage.setItem('reportToLoad', JSON.stringify(reporte.reporte_json));
                 // Guardar adjuntos si existen
                 const adjuntos = this.parseAdjuntos(reporte.archivo_adjunto, reporte.tipo_archivo_adjunto);
+                console.log('🔍 Adjuntos parseados para guardar:', adjuntos);
                 if (adjuntos.length > 0) {
                     sessionStorage.setItem('adjuntosToLoad', JSON.stringify(adjuntos));
+                    console.log('✓ Adjuntos guardados en sessionStorage');
+                } else {
+                    console.log('❌ No hay adjuntos para guardar');
                 }
                 // Redirigir a la página del formulario
                 window.location.href = 'index.html';

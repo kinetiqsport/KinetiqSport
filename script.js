@@ -45,16 +45,21 @@ class ReporteMedico {
                 
                 // Cargar adjuntos si existen
                 const adjuntosToLoad = sessionStorage.getItem('adjuntosToLoad');
+                console.log('adjuntosToLoad desde sessionStorage:', adjuntosToLoad);
                 if (adjuntosToLoad) {
                     this.adjuntos = JSON.parse(adjuntosToLoad);
+                    console.log('Adjuntos parseados:', this.adjuntos);
                     this.mostrarAdjuntosCargados();
                     sessionStorage.removeItem('adjuntosToLoad');
+                } else {
+                    console.log('No hay adjuntosToLoad en sessionStorage');
                 }
                 
                 this.showAlert('✓ Reporte cargado correctamente', 'success');
                 sessionStorage.removeItem('reportToLoad');
                 return;
             } catch (error) {
+                console.error('Error en checkImportedDataFromStorage:', error);
                 this.showAlert('Error al cargar el reporte: ' + error.message, 'error');
             }
         }
@@ -572,10 +577,14 @@ class ReporteMedico {
     }
 
     mostrarAdjuntosCargados() {
+        console.log('mostrarAdjuntosCargados() llamado, adjuntos:', this.adjuntos);
         if (this.adjuntos && this.adjuntos.length > 0) {
             const nombres = this.adjuntos.map(r => r.nombre).join(', ');
             document.getElementById('adjuntoNombre').textContent = nombres;
             document.getElementById('adjuntoInfo').style.display = 'block';
+            console.log('Adjuntos mostrados en UI:', nombres);
+        } else {
+            console.log('No hay adjuntos para mostrar');
         }
     }
 
