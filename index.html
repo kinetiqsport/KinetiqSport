@@ -372,8 +372,13 @@
                                 </label>
                             </div>
                             <div id="adjuntoInfo" style="margin-top: 10px; padding: 10px; background: #f0f4f8; border-radius: 6px; display: none;">
-                                <p style="margin: 0; color: #333;"><strong>Archivo adjunto:</strong> <span id="adjuntoNombre"></span></p>
-                                <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">Este archivo se agregará al PDF cuando descargues el reporte.</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <p style="margin: 0; color: #333;"><strong>Archivo adjunto:</strong> <span id="adjuntoNombre"></span></p>
+                                        <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">Este archivo se agregará al PDF cuando descargues el reporte.</p>
+                                    </div>
+                                    <button type="button" id="borrarAdjuntoBtn" style="padding: 8px 16px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background 0.3s;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='#e74c3c'">🗑️ Borrar</button>
+                                </div>
                             </div>
                         </div>
                     </div>

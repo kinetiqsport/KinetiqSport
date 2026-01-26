@@ -492,6 +492,11 @@
             abrirReporte(reporte) {
                 // Guardar el reporte en sessionStorage
                 sessionStorage.setItem('reportToLoad', JSON.stringify(reporte.reporte_json));
+                // Guardar adjuntos si existen
+                const adjuntos = this.parseAdjuntos(reporte.archivo_adjunto, reporte.tipo_archivo_adjunto);
+                if (adjuntos.length > 0) {
+                    sessionStorage.setItem('adjuntosToLoad', JSON.stringify(adjuntos));
+                }
                 // Redirigir a la página del formulario
                 window.location.href = 'index.html';
             }
