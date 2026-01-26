@@ -335,6 +335,16 @@ class ReporteMedico {
                 console.log('Botón Descargar PDF vinculado');
             }
 
+            // Agregar listener para botón Borrar adjuntos
+            const borrarAdjuntoBtn = document.getElementById('borrarAdjuntoBtn');
+            if (borrarAdjuntoBtn) {
+                borrarAdjuntoBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.borrarAdjuntos();
+                });
+                console.log('Botón Borrar Adjuntos vinculado');
+            }
+
             // Agregar listener para botón Limpiar en sidebar flotante
             const cleanBtns = document.querySelectorAll('.floating-sidebar button[type="reset"]');
             cleanBtns.forEach(btn => {
