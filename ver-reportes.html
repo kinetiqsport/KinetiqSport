@@ -467,25 +467,39 @@
             }
 
             parseAdjuntos(raw, tipoRaw) {
-                if (!raw) return [];
+                if (!raw) {
+                    console.log('🔍 parseAdjuntos: raw es null/undefined');
+                    return [];
+                }
+
+                console.log('🔍 parseAdjuntos raw tipo:', typeof raw, 'primeros 100 chars:', String(raw).substring(0, 100));
 
                 // Si ya viene como array
-                if (Array.isArray(raw)) return raw;
+                if (Array.isArray(raw)) {
+                    console.log('✓ parseAdjuntos: Ya es array, elementos:', raw.length);
+                    return raw;
+                }
 
                 // Intentar parsear JSON (formato nuevo)
                 if (typeof raw === 'string') {
                     try {
                         const parsed = JSON.parse(raw);
-                        if (Array.isArray(parsed)) return parsed;
+                        if (Array.isArray(parsed)) {
+                            console.log('✓ parseAdjuntos: JSON parseado, es array con', parsed.length, 'elementos');
+                            return parsed;
+                        }
                     } catch (err) {
+                        console.log('⚠️  parseAdjuntos: Error parseando JSON:', err.message);
                         // Podría ser formato viejo: dataURL directo
                         if (raw.startsWith('data:')) {
+                            console.log('✓ parseAdjuntos: Detectado formato legacy (data URL)');
                             return [{ nombre: 'adjunto', tipo: tipoRaw || 'application/octet-stream', data: raw }];
                         }
-                        console.warn('No se pudieron parsear adjuntos', err);
+                        console.warn('❌ No se pudieron parsear adjuntos', err);
                     }
                 }
 
+                console.log('❌ parseAdjuntos: No se pudo procesar, retornando array vacío');
                 return [];
             }
 
@@ -497,12 +511,14 @@
                 console.log('🔍 Adjuntos parseados para guardar:', adjuntos);
                 if (adjuntos.length > 0) {
                     sessionStorage.setItem('adjuntosToLoad', JSON.stringify(adjuntos));
-                    console.log('✓ Adjuntos guardados en sessionStorage');
+                    console.log('✓ Adjuntos guardados en sessionStorage:', adjuntos.length, 'archivo(s)');
                 } else {
                     console.log('❌ No hay adjuntos para guardar');
                 }
-                // Redirigir a la página del formulario
-                window.location.href = 'index.html';
+                // Redirigir a la página del formulario con pequeño delay para asegurar persistencia
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 100);
             }
 
             showError(message) {
