@@ -606,15 +606,20 @@ class ReporteMedico {
     }
 
     borrarAdjuntos() {
-        this.adjuntos = [];
-        this.adjuntosEliminadosFlag = true; // Marcar que se deben eliminar de la DB
-        document.getElementById('adjuntoInfo').style.display = 'none';
-        document.getElementById('adjuntoNombre').textContent = '';
-        const input = document.getElementById('pdfImagenInput');
-        if (input) {
-            input.value = '';
+        // Mostrar confirmación
+        if (confirm('¿Estás seguro de que deseas eliminar los archivos adjuntos?\nEsta acción se aplicará cuando guardes el reporte.')) {
+            this.adjuntos = [];
+            this.adjuntosEliminadosFlag = true; // Marcar que se deben eliminar de la DB
+            document.getElementById('adjuntoInfo').style.display = 'none';
+            document.getElementById('adjuntoNombre').textContent = '';
+            const input = document.getElementById('pdfImagenInput');
+            if (input) {
+                input.value = '';
+            }
+            this.showAlert('✓ Archivos adjuntos eliminados (se quitarán al guardar)', 'success');
+        } else {
+            this.showAlert('Eliminación cancelada', 'info');
         }
-        this.showAlert('✓ Archivos adjuntos eliminados (se quitarán al guardar)', 'success');
     }
 
     handlePdfImagenSelect(event) {
