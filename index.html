@@ -360,9 +360,16 @@
                     <div class="section-content">
                         <div class="form-group">
                             <label for="pdfImagenInput">Adjuntar PDF o Imagen:</label>
-                            <div class="file-input-wrapper">
-                                <input type="file" id="pdfImagenInput" accept=".pdf,.jpg,.jpeg,.png,.gif" class="form-control">
-                                <small style="color: #666;">Formatos soportados: PDF, JPG, PNG, GIF. Máx. 10MB</small>
+                            <div class="file-upload-card">
+                                <input type="file" id="pdfImagenInput" accept=".pdf,.jpg,.jpeg,.png,.gif" class="file-upload-input" aria-label="Adjuntar PDF o imagen" multiple>
+                                <label for="pdfImagenInput" class="file-upload-label">
+                                    <div class="file-upload-icon">📎</div>
+                                    <div class="file-upload-text">
+                                        <strong>Sube tu archivo</strong>
+                                        <span>PDF, JPG, PNG o GIF · Máx. 10MB</span>
+                                    </div>
+                                    <div class="file-upload-cta">Explorar</div>
+                                </label>
                             </div>
                             <div id="adjuntoInfo" style="margin-top: 10px; padding: 10px; background: #f0f4f8; border-radius: 6px; display: none;">
                                 <p style="margin: 0; color: #333;"><strong>Archivo adjunto:</strong> <span id="adjuntoNombre"></span></p>

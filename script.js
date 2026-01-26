@@ -13,9 +13,8 @@ class ReporteMedico {
             this.imcInput = document.getElementById('imc');
             this.reportDateElement = document.getElementById('reportDate');
             
-            // Almacenar archivo adjunto
-            this.archivoAdjunto = null;
-            this.tipoArchivoAdjunto = null;
+            // Almacenar archivos adjuntos
+            this.adjuntos = [];
             
             if (!this.form || !this.pesoInput || !this.tallaInput || !this.imcInput) {
                 console.error('Elementos del formulario no encontrados');
@@ -313,9 +312,8 @@ class ReporteMedico {
                     if (this.form) {
                         this.form.reset();
                     }
-                    // Limpiar archivo adjunto
-                    this.archivoAdjunto = null;
-                    this.tipoArchivoAdjunto = null;
+                    // Limpiar archivos adjuntos
+                    this.adjuntos = [];
                     const pdfImagenInput = document.getElementById('pdfImagenInput');
                     if (pdfImagenInput) {
                         pdfImagenInput.value = '';
@@ -564,53 +562,58 @@ class ReporteMedico {
     }
 
     handlePdfImagenSelect(event) {
-        const file = event.target.files[0];
-        if (!file) {
+        const files = Array.from(event.target.files || []);
+        if (files.length === 0) {
             // Limpiar si se deselecciona
-            this.archivoAdjunto = null;
-            this.tipoArchivoAdjunto = null;
+            this.adjuntos = [];
             document.getElementById('adjuntoInfo').style.display = 'none';
             return;
         }
 
-        // Validar tamaño (máx 10MB)
-        const maxSize = 10 * 1024 * 1024;
-        if (file.size > maxSize) {
-            this.showAlert('El archivo es demasiado grande (máx. 10MB)', 'error');
-            event.target.value = '';
-            return;
-        }
-
-        // Validar tipo
+        const maxSize = 10 * 1024 * 1024; // 10MB
         const tiposValidos = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif'];
-        if (!tiposValidos.includes(file.type)) {
-            this.showAlert('Solo se permiten archivos PDF o imágenes (JPG, PNG, GIF)', 'error');
-            event.target.value = '';
-            return;
-        }
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                this.archivoAdjunto = e.target.result; // Base64
-                this.tipoArchivoAdjunto = file.type;
-                
-                // Mostrar info del archivo
-                document.getElementById('adjuntoNombre').textContent = file.name;
-                document.getElementById('adjuntoInfo').style.display = 'block';
-                
-                this.showAlert(`✓ Archivo "${file.name}" cargado correctamente`, 'success');
-                console.log('Archivo adjunto guardado:', {
+        const lecturas = files.map(file => new Promise((resolve, reject) => {
+            if (file.size > maxSize) {
+                reject(new Error(`El archivo ${file.name} supera 10MB`));
+                return;
+            }
+            if (!tiposValidos.includes(file.type)) {
+                reject(new Error(`Tipo no permitido en ${file.name}`));
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                resolve({
                     nombre: file.name,
                     tipo: file.type,
-                    tamaño: file.size
+                    data: e.target.result // Base64
                 });
-            } catch (error) {
-                console.error('Error al procesar archivo:', error);
-                this.showAlert('Error al procesar el archivo: ' + error.message, 'error');
-            }
-        };
-        reader.readAsDataURL(file);
+            };
+            reader.onerror = () => reject(new Error(`No se pudo leer ${file.name}`));
+            reader.readAsDataURL(file);
+        }));
+
+        Promise.all(lecturas)
+            .then(resultados => {
+                this.adjuntos = resultados;
+
+                // Mostrar info de los archivos
+                const nombres = resultados.map(r => r.nombre).join(', ');
+                document.getElementById('adjuntoNombre').textContent = nombres;
+                document.getElementById('adjuntoInfo').style.display = 'block';
+
+                this.showAlert(`✓ ${resultados.length} archivo(s) cargado(s) correctamente`, 'success');
+                console.log('Archivos adjuntos guardados:', resultados.map(r => ({ nombre: r.nombre, tipo: r.tipo, tamaño: r.data.length })));
+            })
+            .catch(error => {
+                console.error('Error al procesar archivos:', error);
+                this.showAlert('Error al procesar adjuntos: ' + error.message, 'error');
+                event.target.value = '';
+                this.adjuntos = [];
+                document.getElementById('adjuntoInfo').style.display = 'none';
+            });
     }
 
     async saveReportToDB() {
@@ -766,6 +769,11 @@ class ReporteMedico {
         return formData;
     }
 
+    tieneDatosSaltos() {
+        const inputs = document.querySelectorAll('.salto-input');
+        return Array.from(inputs).some(input => (input.value || '').trim() !== '');
+    }
+
     async guardarEnDB() {
         try {
             // Verificar que Supabase esté configurado
@@ -804,11 +812,11 @@ class ReporteMedico {
                 fecha_modificacion: new Date().toISOString()
             };
 
-            // Agregar archivo adjunto si existe
-            if (this.archivoAdjunto && this.tipoArchivoAdjunto) {
-                dataToSave.archivo_adjunto = this.archivoAdjunto; // Base64
-                dataToSave.tipo_archivo_adjunto = this.tipoArchivoAdjunto;
-                console.log('Archivo adjunto incluido en datos a guardar');
+            // Agregar archivos adjuntos si existen
+            if (this.adjuntos && this.adjuntos.length > 0) {
+                dataToSave.archivo_adjunto = JSON.stringify(this.adjuntos);
+                dataToSave.tipo_archivo_adjunto = this.adjuntos.length > 1 ? 'multiple' : this.adjuntos[0].tipo;
+                console.log('Archivos adjuntos incluidos en datos a guardar');
             }
 
             // Verificar si ya existe un reporte con esta cédula
@@ -1061,47 +1069,49 @@ class ReporteMedico {
             });
 
             // ==================== PÁGINA 3: TESTS DE SALTO ====================
-            doc.addPage();
-            yPos = 20;
+            if (this.tieneDatosSaltos()) {
+                doc.addPage();
+                yPos = 20;
 
-            this.addSectionHeader(doc, 'TESTS DE SALTO', yPos, primaryColor, accentColor);
-            yPos += 9;
+                this.addSectionHeader(doc, 'TESTS DE SALTO', yPos, primaryColor, accentColor);
+                yPos += 9;
 
-            const saltosTypes = ['cmj', 'sj', 'dj', 'abralakov', 'cmj1-1'];
-            const saltosNames = ['CMJ', 'SJ', 'DJ', 'Abralakov', 'CMJ 1-1'];
-            const saltosBody = [];
+                const saltosTypes = ['cmj', 'sj', 'dj', 'abralakov', 'cmj1-1'];
+                const saltosNames = ['CMJ', 'SJ', 'DJ', 'Abralakov', 'CMJ 1-1'];
+                const saltosBody = [];
 
-            saltosTypes.forEach((type, index) => {
-                const row = [saltosNames[index]];
-                ['peso', 'altura', 'velocidad', 'tVuelo', 'q', 'caida', 'n', 'rfd'].forEach(col => {
-                    const input = document.querySelector(`input[data-salto="${type}"][data-col="${col}"]`);
-                    row.push(input?.value || '-');
+                saltosTypes.forEach((type, index) => {
+                    const row = [saltosNames[index]];
+                    ['peso', 'altura', 'velocidad', 'tVuelo', 'q', 'caida', 'n', 'rfd'].forEach(col => {
+                        const input = document.querySelector(`input[data-salto="${type}"][data-col="${col}"]`);
+                        row.push(input?.value || '-');
+                    });
+                    saltosBody.push(row);
                 });
-                saltosBody.push(row);
-            });
 
-            doc.autoTable({
-                startY: yPos,
-                head: [['Test', 'Peso', 'Altura', 'Vel.', 'T.Vuelo', 'Q', 'Caída', 'N', 'RFD']],
-                body: saltosBody,
-                theme: 'striped',
-                styles: { fontSize: 8.5, cellPadding: 3, textColor: textDark, halign: 'center' },
-                headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontSize: 9, fontStyle: 'bold', halign: 'center' },
-                columnStyles: {
-                    0: { fontStyle: 'bold', cellWidth: 30 },
-                    1: { halign: 'center', cellWidth: 22 },
-                    2: { halign: 'center', cellWidth: 22 },
-                    3: { halign: 'center', cellWidth: 20 },
-                    4: { halign: 'center', cellWidth: 22 },
-                    5: { halign: 'center', cellWidth: 18 },
-                    6: { halign: 'center', cellWidth: 20 },
-                    7: { halign: 'center', cellWidth: 18 },
-                    8: { halign: 'center', cellWidth: 18 }
-                },
-                margin: { right: 15 }
-            });
+                doc.autoTable({
+                    startY: yPos,
+                    head: [['Test', 'Peso', 'Altura', 'Vel.', 'T.Vuelo', 'Q', 'Caída', 'N', 'RFD']],
+                    body: saltosBody,
+                    theme: 'striped',
+                    styles: { fontSize: 8.5, cellPadding: 3, textColor: textDark, halign: 'center' },
+                    headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontSize: 9, fontStyle: 'bold', halign: 'center' },
+                    columnStyles: {
+                        0: { fontStyle: 'bold', cellWidth: 30 },
+                        1: { halign: 'center', cellWidth: 22 },
+                        2: { halign: 'center', cellWidth: 22 },
+                        3: { halign: 'center', cellWidth: 20 },
+                        4: { halign: 'center', cellWidth: 22 },
+                        5: { halign: 'center', cellWidth: 18 },
+                        6: { halign: 'center', cellWidth: 20 },
+                        7: { halign: 'center', cellWidth: 18 },
+                        8: { halign: 'center', cellWidth: 18 }
+                    },
+                    margin: { right: 15 }
+                });
 
-            yPos = doc.lastAutoTable.finalY + 10;
+                yPos = doc.lastAutoTable.finalY + 10;
+            }
 
             // FOOTER EN TODAS LAS PÁGINAS
             const pageCount = doc.getNumberOfPages();
@@ -1113,29 +1123,35 @@ class ReporteMedico {
                 doc.text('KINETIQ SPORTS - Reporte Médico', 15, 285);
             }
 
-            // Si hay adjunto imagen, se agrega como nueva página antes de exportar
-            if (this.archivoAdjunto && this.tipoArchivoAdjunto?.startsWith('image/')) {
-                await this.agregarArchivoAlPDF(doc);
+            // Agregar imágenes adjuntas como nuevas páginas
+            if (this.adjuntos && this.adjuntos.length > 0) {
+                const imagenes = this.adjuntos.filter(a => a.tipo.startsWith('image/'));
+                for (const imagen of imagenes) {
+                    await this.agregarArchivoAlPDF(doc, imagen);
+                }
             }
 
             // Exportar a bytes
             let pdfBytes = doc.output('arraybuffer');
 
-            // Si hay adjunto PDF, mergear con pdf-lib
-            if (this.archivoAdjunto && this.tipoArchivoAdjunto === 'application/pdf') {
+            // Mergear PDFs adjuntos con pdf-lib
+            if (this.adjuntos && this.adjuntos.some(a => a.tipo === 'application/pdf')) {
                 if (!window.PDFLib) {
                     throw new Error('PDF-LIB no está cargado');
                 }
 
                 const { PDFDocument } = window.PDFLib;
-
-                const base64Data = this.archivoAdjunto.split(',')[1];
-                const attachmentBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-
                 const mainDoc = await PDFDocument.load(pdfBytes);
-                const attachDoc = await PDFDocument.load(attachmentBytes);
-                const pages = await mainDoc.copyPages(attachDoc, attachDoc.getPageIndices());
-                pages.forEach(p => mainDoc.addPage(p));
+
+                const pdfAdjuntos = this.adjuntos.filter(a => a.tipo === 'application/pdf');
+                for (const adj of pdfAdjuntos) {
+                    const base64Data = adj.data.split(',')[1];
+                    const attachmentBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+                    const attachDoc = await PDFDocument.load(attachmentBytes);
+                    const pages = await mainDoc.copyPages(attachDoc, attachDoc.getPageIndices());
+                    pages.forEach(p => mainDoc.addPage(p));
+                }
+
                 pdfBytes = await mainDoc.save();
             }
 
@@ -1188,9 +1204,9 @@ class ReporteMedico {
         doc.text(title, 15, yPos + 5.5);
     }
 
-    async agregarArchivoAlPDF(doc) {
+    async agregarArchivoAlPDF(doc, adjunto) {
         try {
-            if (!this.tipoArchivoAdjunto || !this.tipoArchivoAdjunto.startsWith('image/')) {
+            if (!adjunto?.tipo || !adjunto.tipo.startsWith('image/')) {
                 // Solo manejamos imágenes aquí; PDFs se mergean con pdf-lib en otro paso
                 return;
             }
@@ -1218,7 +1234,7 @@ class ReporteMedico {
             
             // Agregar la imagen
             const img = new Image();
-            img.src = this.archivoAdjunto;
+            img.src = adjunto.data;
 
             await new Promise((resolve) => {
                 img.onload = () => {
@@ -1239,7 +1255,7 @@ class ReporteMedico {
                     }
 
                     const xPos = (210 - width) / 2;
-                    doc.addImage(this.archivoAdjunto, this.tipoArchivoAdjunto.split('/')[1].toUpperCase(), xPos, yPos, width, height);
+                    doc.addImage(adjunto.data, adjunto.tipo.split('/')[1].toUpperCase(), xPos, yPos, width, height);
                     resolve();
                 };
             });
