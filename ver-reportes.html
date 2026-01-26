@@ -417,7 +417,7 @@
                 info.appendChild(cedula);
                 info.appendChild(fecha);
 
-                const adjuntos = this.parseAdjuntos(reporte.archivo_adjunto);
+                const adjuntos = this.parseAdjuntos(reporte.archivo_adjunto, reporte.tipo_archivo_adjunto);
                 if (adjuntos.length > 0) {
                     const adjDiv = document.createElement('div');
                     adjDiv.className = 'adjuntos';
@@ -466,15 +466,27 @@
                 return card;
             }
 
-            parseAdjuntos(raw) {
+            parseAdjuntos(raw, tipoRaw) {
                 if (!raw) return [];
-                try {
-                    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-                    return Array.isArray(parsed) ? parsed : [];
-                } catch (err) {
-                    console.warn('No se pudieron parsear adjuntos', err);
-                    return [];
+
+                // Si ya viene como array
+                if (Array.isArray(raw)) return raw;
+
+                // Intentar parsear JSON (formato nuevo)
+                if (typeof raw === 'string') {
+                    try {
+                        const parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed)) return parsed;
+                    } catch (err) {
+                        // Podría ser formato viejo: dataURL directo
+                        if (raw.startsWith('data:')) {
+                            return [{ nombre: 'adjunto', tipo: tipoRaw || 'application/octet-stream', data: raw }];
+                        }
+                        console.warn('No se pudieron parsear adjuntos', err);
+                    }
                 }
+
+                return [];
             }
 
             abrirReporte(reporte) {
