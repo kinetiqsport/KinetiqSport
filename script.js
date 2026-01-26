@@ -15,6 +15,7 @@ class ReporteMedico {
             
             // Almacenar archivos adjuntos
             this.adjuntos = [];
+            this.adjuntosEliminadosFlag = false; // Bandera para eliminar adjuntos de DB al guardar
             
             if (!this.form || !this.pesoInput || !this.tallaInput || !this.imcInput) {
                 console.error('Elementos del formulario no encontrados');
@@ -41,6 +42,15 @@ class ReporteMedico {
             try {
                 const data = JSON.parse(reportToLoad);
                 this.loadDataFromObject(data);
+                
+                // Cargar adjuntos si existen
+                const adjuntosToLoad = sessionStorage.getItem('adjuntosToLoad');
+                if (adjuntosToLoad) {
+                    this.adjuntos = JSON.parse(adjuntosToLoad);
+                    this.mostrarAdjuntosCargados();
+                    sessionStorage.removeItem('adjuntosToLoad');
+                }
+                
                 this.showAlert('✓ Reporte cargado correctamente', 'success');
                 sessionStorage.removeItem('reportToLoad');
                 return;
@@ -561,6 +571,26 @@ class ReporteMedico {
         reader.readAsText(file);
     }
 
+    mostrarAdjuntosCargados() {
+        if (this.adjuntos && this.adjuntos.length > 0) {
+            const nombres = this.adjuntos.map(r => r.nombre).join(', ');
+            document.getElementById('adjuntoNombre').textContent = nombres;
+            document.getElementById('adjuntoInfo').style.display = 'block';
+        }
+    }
+
+    borrarAdjuntos() {
+        this.adjuntos = [];
+        this.adjuntosEliminadosFlag = true; // Marcar que se deben eliminar de la DB
+        document.getElementById('adjuntoInfo').style.display = 'none';
+        document.getElementById('adjuntoNombre').textContent = '';
+        const input = document.getElementById('pdfImagenInput');
+        if (input) {
+            input.value = '';
+        }
+        this.showAlert('✓ Archivos adjuntos eliminados (se quitarán al guardar)', 'success');
+    }
+
     handlePdfImagenSelect(event) {
         const files = Array.from(event.target.files || []);
         if (files.length === 0) {
@@ -598,6 +628,7 @@ class ReporteMedico {
         Promise.all(lecturas)
             .then(resultados => {
                 this.adjuntos = resultados;
+                this.adjuntosEliminadosFlag = false; // Reset flag al cargar nuevos archivos
 
                 // Mostrar info de los archivos
                 const nombres = resultados.map(r => r.nombre).join(', ');
@@ -817,6 +848,13 @@ class ReporteMedico {
                 dataToSave.archivo_adjunto = JSON.stringify(this.adjuntos);
                 dataToSave.tipo_archivo_adjunto = this.adjuntos.length > 1 ? 'multiple' : this.adjuntos[0].tipo;
                 console.log('Archivos adjuntos incluidos en datos a guardar');
+                this.adjuntosEliminadosFlag = false; // Reset flag
+            } else if (this.adjuntosEliminadosFlag) {
+                // Si se marcó para eliminar adjuntos, poner null explícitamente
+                dataToSave.archivo_adjunto = null;
+                dataToSave.tipo_archivo_adjunto = null;
+                console.log('Adjuntos marcados para eliminar de DB');
+                this.adjuntosEliminadosFlag = false; // Reset flag
             }
 
             // Verificar si ya existe un reporte con esta cédula
