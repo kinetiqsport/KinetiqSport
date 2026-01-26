@@ -13,6 +13,10 @@ class ReporteMedico {
             this.imcInput = document.getElementById('imc');
             this.reportDateElement = document.getElementById('reportDate');
             
+            // Almacenar archivo adjunto
+            this.archivoAdjunto = null;
+            this.tipoArchivoAdjunto = null;
+            
             if (!this.form || !this.pesoInput || !this.tallaInput || !this.imcInput) {
                 console.error('Elementos del formulario no encontrados');
                 return;
@@ -273,6 +277,15 @@ class ReporteMedico {
                 console.log('Botón Cargar vinculado');
             }
 
+            // Listener para archivo adjunto (PDF/Imagen)
+            const pdfImagenInput = document.getElementById('pdfImagenInput');
+            if (pdfImagenInput) {
+                pdfImagenInput.addEventListener('change', (e) => {
+                    this.handlePdfImagenSelect(e);
+                });
+                console.log('Input PDF/Imagen vinculado');
+            }
+
             const saveBtn = document.getElementById('saveBtn');
             if (saveBtn) {
                 saveBtn.addEventListener('click', (e) => {
@@ -522,6 +535,56 @@ class ReporteMedico {
         reader.readAsText(file);
     }
 
+    handlePdfImagenSelect(event) {
+        const file = event.target.files[0];
+        if (!file) {
+            // Limpiar si se deselecciona
+            this.archivoAdjunto = null;
+            this.tipoArchivoAdjunto = null;
+            document.getElementById('adjuntoInfo').style.display = 'none';
+            return;
+        }
+
+        // Validar tamaño (máx 10MB)
+        const maxSize = 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+            this.showAlert('El archivo es demasiado grande (máx. 10MB)', 'error');
+            event.target.value = '';
+            return;
+        }
+
+        // Validar tipo
+        const tiposValidos = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif'];
+        if (!tiposValidos.includes(file.type)) {
+            this.showAlert('Solo se permiten archivos PDF o imágenes (JPG, PNG, GIF)', 'error');
+            event.target.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                this.archivoAdjunto = e.target.result; // Base64
+                this.tipoArchivoAdjunto = file.type;
+                
+                // Mostrar info del archivo
+                document.getElementById('adjuntoNombre').textContent = file.name;
+                document.getElementById('adjuntoInfo').style.display = 'block';
+                
+                this.showAlert(`✓ Archivo "${file.name}" cargado correctamente`, 'success');
+                console.log('Archivo adjunto guardado:', {
+                    nombre: file.name,
+                    tipo: file.type,
+                    tamaño: file.size
+                });
+            } catch (error) {
+                console.error('Error al procesar archivo:', error);
+                this.showAlert('Error al procesar el archivo: ' + error.message, 'error');
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
     async saveReportToDB() {
         console.log('saveReportToDB() llamado');
         
@@ -538,17 +601,69 @@ class ReporteMedico {
             return;
         }
 
-        try {
-            // Mostrar indicador de carga
-            const alertMsg = this.showAlert('Guardando datos...', 'info');
+        // Mostrar modal de confirmación para guardar
+        this.showSaveConfirmModal();
+    }
+
+    showSaveConfirmModal() {
+        const modal = document.getElementById('confirmModal');
+        const modalContent = modal.querySelector('.modal-content');
+        
+        // Cambiar contenido del modal para guardar
+        const modalIcon = modal.querySelector('.modal-icon');
+        const modalTitle = modal.querySelector('.modal-title');
+        const modalMessage = modal.querySelector('.modal-message');
+        
+        modalIcon.textContent = '💾';
+        modalTitle.textContent = '¿Guardar Reporte?';
+        modalMessage.textContent = 'Se guardarán los datos del paciente en la base de datos de forma segura.';
+        
+        modal.classList.add('active');
+        
+        // Remover listeners previos
+        const modalCancel = modal.querySelector('#modalCancel');
+        const modalConfirm = modal.querySelector('#modalConfirm');
+        
+        const newModalCancel = modalCancel.cloneNode(true);
+        const newModalConfirm = modalConfirm.cloneNode(true);
+        modalCancel.parentNode.replaceChild(newModalCancel, modalCancel);
+        modalConfirm.parentNode.replaceChild(newModalConfirm, modalConfirm);
+        
+        // Cancelar
+        newModalCancel.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        
+        // Confirmar guardado
+        newModalConfirm.addEventListener('click', async () => {
+            // Deshabilitar botones
+            newModalConfirm.disabled = true;
+            newModalCancel.disabled = true;
             
+            // Mostrar loading
+            document.querySelector('.modal-loading').classList.add('active');
+            document.querySelector('.modal-buttons').style.display = 'none';
+            
+            await this.executeSaveReport();
+        });
+    }
+
+    async executeSaveReport() {
+        try {
             // Guardar en base de datos
             await this.guardarEnDB();
+            
+            // Cerrar modal
+            document.getElementById('confirmModal').classList.remove('active');
             
             // Mostrar mensaje de éxito
             this.showAlert('✓ Reporte guardado correctamente', 'success');
         } catch (error) {
-            console.error('Error en saveReportToDB:', error);
+            console.error('Error en executeSaveReport:', error);
+            
+            // Cerrar modal
+            document.getElementById('confirmModal').classList.remove('active');
+            
             this.showAlert('Error al guardar: ' + error.message, 'error');
         }
     }
@@ -660,6 +775,13 @@ class ReporteMedico {
                 reporte_json: reporteData,
                 fecha_modificacion: new Date().toISOString()
             };
+
+            // Agregar archivo adjunto si existe
+            if (this.archivoAdjunto && this.tipoArchivoAdjunto) {
+                dataToSave.archivo_adjunto = this.archivoAdjunto; // Base64
+                dataToSave.tipo_archivo_adjunto = this.tipoArchivoAdjunto;
+                console.log('Archivo adjunto incluido en datos a guardar');
+            }
 
             // Verificar si ya existe un reporte con esta cédula
             const existente = await window.supabaseClient.getReporteByCedula(cedula);
@@ -963,6 +1085,11 @@ class ReporteMedico {
                 doc.text('KINETIQ SPORTS - Reporte Médico', 15, 285);
             }
 
+            // Agregar archivo adjunto si existe
+            if (this.archivoAdjunto) {
+                await this.agregarArchivoAlPDF(doc);
+            }
+
             doc.save(filename);
             
             // Guardar en base de datos
@@ -1001,6 +1128,126 @@ class ReporteMedico {
         doc.setTextColor(...primaryColor);
         doc.setFont('helvetica', 'bold');
         doc.text(title, 15, yPos + 5.5);
+    }
+
+    async agregarArchivoAlPDF(doc) {
+        try {
+            const esImagen = this.tipoArchivoAdjunto.startsWith('image/');
+            
+            if (esImagen) {
+                // Agregar imagen
+                doc.addPage();
+                
+                const primaryColor = [15, 76, 129];
+                const accentColor = [0, 184, 212];
+                
+                let yPos = 15;
+                
+                // Header
+                doc.setFillColor(...primaryColor);
+                doc.rect(0, 0, 210, 35, 'F');
+                
+                doc.setFillColor(...accentColor);
+                doc.rect(0, 32, 210, 3, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text('ANEXO ADJUNTO', 15, 20);
+                
+                yPos = 45;
+                
+                // Agregar la imagen
+                const img = new Image();
+                img.onload = () => {
+                    // Calcular dimensiones para que se ajuste al PDF
+                    const maxWidth = 180; // mm
+                    const maxHeight = 200; // mm
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    // Mantener proporción
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width = (width * maxHeight) / height;
+                            height = maxHeight;
+                        }
+                    }
+                    
+                    // Centrar imagen
+                    const xPos = (210 - width) / 2;
+                    doc.addImage(this.archivoAdjunto, this.tipoArchivoAdjunto.split('/')[1].toUpperCase(), xPos, yPos, width, height);
+                };
+                img.src = this.archivoAdjunto;
+                
+                // Esperar a que se cargue la imagen
+                await new Promise((resolve) => {
+                    img.onload = () => {
+                        const maxWidth = 180;
+                        const maxHeight = 200;
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height = (height * maxWidth) / width;
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width = (width * maxHeight) / height;
+                                height = maxHeight;
+                            }
+                        }
+                        
+                        const xPos = (210 - width) / 2;
+                        doc.addImage(this.archivoAdjunto, this.tipoArchivoAdjunto.split('/')[1].toUpperCase(), xPos, yPos, width, height);
+                        resolve();
+                    };
+                });
+            } else if (this.tipoArchivoAdjunto === 'application/pdf') {
+                // Para PDF, mostrar nota informativa
+                doc.addPage();
+                
+                const primaryColor = [15, 76, 129];
+                const accentColor = [0, 184, 212];
+                const textDark = [33, 33, 33];
+                
+                // Header
+                doc.setFillColor(...primaryColor);
+                doc.rect(0, 0, 210, 35, 'F');
+                
+                doc.setFillColor(...accentColor);
+                doc.rect(0, 32, 210, 3, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text('ARCHIVO ADJUNTO', 15, 20);
+                
+                // Contenido
+                doc.setFontSize(11);
+                doc.setTextColor(...textDark);
+                doc.setFont('helvetica', 'normal');
+                
+                doc.text('Se adjuntó un archivo PDF a este reporte.', 15, 50);
+                doc.text('El archivo está almacenado en la base de datos y disponible', 15, 60);
+                doc.text('para descargar cuando se cargue el reporte.', 15, 70);
+                
+                // Información del archivo
+                const fileName = document.getElementById('pdfImagenInput')?.files[0]?.name || 'archivo.pdf';
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Nombre del archivo: ' + fileName, 15, 85);
+            }
+        } catch (error) {
+            console.error('Error al agregar archivo adjunto:', error);
+        }
     }
 
     showAlert(message, type = 'info') {
