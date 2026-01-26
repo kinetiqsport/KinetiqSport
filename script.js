@@ -668,16 +668,17 @@ class ReporteMedico {
 
         Promise.all(lecturas)
             .then(resultados => {
-                this.adjuntos = resultados;
+                // Agregar nuevos archivos a los existentes en lugar de reemplazar
+                this.adjuntos = [...this.adjuntos, ...resultados];
                 this.adjuntosEliminadosFlag = false; // Reset flag al cargar nuevos archivos
 
                 // Mostrar info de los archivos
-                const nombres = resultados.map(r => r.nombre).join(', ');
+                const nombres = this.adjuntos.map(r => r.nombre).join(', ');
                 document.getElementById('adjuntoNombre').textContent = nombres;
                 document.getElementById('adjuntoInfo').style.display = 'block';
 
-                this.showAlert(`✓ ${resultados.length} archivo(s) cargado(s) correctamente`, 'success');
-                console.log('Archivos adjuntos guardados:', resultados.map(r => ({ nombre: r.nombre, tipo: r.tipo, tamaño: r.data.length })));
+                this.showAlert(`✓ ${resultados.length} archivo(s) agregado(s). Total: ${this.adjuntos.length} archivo(s)`, 'success');
+                console.log('Archivos adjuntos actuales:', this.adjuntos.map(r => ({ nombre: r.nombre, tipo: r.tipo, tamaño: r.data.length })));
             })
             .catch(error => {
                 console.error('Error al procesar archivos:', error);
@@ -761,6 +762,11 @@ class ReporteMedico {
             
             // Mostrar mensaje de éxito
             this.showAlert('✓ Reporte guardado correctamente', 'success');
+            
+            // Redirigir a bienvenida después de 1.5 segundos
+            setTimeout(() => {
+                window.location.href = 'bienvenida.html';
+            }, 1500);
         } catch (error) {
             console.error('Error en executeSaveReport:', error);
             
