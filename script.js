@@ -303,6 +303,34 @@ class ReporteMedico {
                 });
                 console.log('Botón Descargar PDF vinculado');
             }
+
+            // Agregar listener para botón Limpiar en sidebar flotante
+            const cleanBtns = document.querySelectorAll('.floating-sidebar button[type="reset"]');
+            cleanBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    // Limpiar el formulario
+                    if (this.form) {
+                        this.form.reset();
+                    }
+                    // Limpiar archivo adjunto
+                    this.archivoAdjunto = null;
+                    this.tipoArchivoAdjunto = null;
+                    const pdfImagenInput = document.getElementById('pdfImagenInput');
+                    if (pdfImagenInput) {
+                        pdfImagenInput.value = '';
+                    }
+                    const adjuntoInfo = document.getElementById('adjuntoInfo');
+                    if (adjuntoInfo) {
+                        adjuntoInfo.style.display = 'none';
+                    }
+                    // Recalcular IMC en caso de que se haya completado
+                    this.setReportDate();
+                    this.showAlert('✓ Formulario limpiado correctamente', 'success');
+                    console.log('Formulario limpiado');
+                });
+            });
+            console.log('Botón Limpiar en sidebar vinculado');
         } catch (error) {
             console.error('Error en setupEventListeners:', error);
         }
@@ -1085,12 +1113,42 @@ class ReporteMedico {
                 doc.text('KINETIQ SPORTS - Reporte Médico', 15, 285);
             }
 
-            // Agregar archivo adjunto si existe
-            if (this.archivoAdjunto) {
+            // Si hay adjunto imagen, se agrega como nueva página antes de exportar
+            if (this.archivoAdjunto && this.tipoArchivoAdjunto?.startsWith('image/')) {
                 await this.agregarArchivoAlPDF(doc);
             }
 
-            doc.save(filename);
+            // Exportar a bytes
+            let pdfBytes = doc.output('arraybuffer');
+
+            // Si hay adjunto PDF, mergear con pdf-lib
+            if (this.archivoAdjunto && this.tipoArchivoAdjunto === 'application/pdf') {
+                if (!window.PDFLib) {
+                    throw new Error('PDF-LIB no está cargado');
+                }
+
+                const { PDFDocument } = window.PDFLib;
+
+                const base64Data = this.archivoAdjunto.split(',')[1];
+                const attachmentBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+
+                const mainDoc = await PDFDocument.load(pdfBytes);
+                const attachDoc = await PDFDocument.load(attachmentBytes);
+                const pages = await mainDoc.copyPages(attachDoc, attachDoc.getPageIndices());
+                pages.forEach(p => mainDoc.addPage(p));
+                pdfBytes = await mainDoc.save();
+            }
+
+            // Descargar el PDF resultante
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
             
             // Guardar en base de datos
             await this.guardarEnDB();
@@ -1132,41 +1190,42 @@ class ReporteMedico {
 
     async agregarArchivoAlPDF(doc) {
         try {
-            const esImagen = this.tipoArchivoAdjunto.startsWith('image/');
+            if (!this.tipoArchivoAdjunto || !this.tipoArchivoAdjunto.startsWith('image/')) {
+                // Solo manejamos imágenes aquí; PDFs se mergean con pdf-lib en otro paso
+                return;
+            }
+
+            doc.addPage();
             
-            if (esImagen) {
-                // Agregar imagen
-                doc.addPage();
-                
-                const primaryColor = [15, 76, 129];
-                const accentColor = [0, 184, 212];
-                
-                let yPos = 15;
-                
-                // Header
-                doc.setFillColor(...primaryColor);
-                doc.rect(0, 0, 210, 35, 'F');
-                
-                doc.setFillColor(...accentColor);
-                doc.rect(0, 32, 210, 3, 'F');
-                
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(16);
-                doc.setFont('helvetica', 'bold');
-                doc.text('ANEXO ADJUNTO', 15, 20);
-                
-                yPos = 45;
-                
-                // Agregar la imagen
-                const img = new Image();
+            const primaryColor = [15, 76, 129];
+            const accentColor = [0, 184, 212];
+            
+            let yPos = 15;
+            
+            // Header
+            doc.setFillColor(...primaryColor);
+            doc.rect(0, 0, 210, 35, 'F');
+            
+            doc.setFillColor(...accentColor);
+            doc.rect(0, 32, 210, 3, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('ANEXO ADJUNTO', 15, 20);
+            
+            yPos = 45;
+            
+            // Agregar la imagen
+            const img = new Image();
+            img.src = this.archivoAdjunto;
+
+            await new Promise((resolve) => {
                 img.onload = () => {
-                    // Calcular dimensiones para que se ajuste al PDF
                     const maxWidth = 180; // mm
                     const maxHeight = 200; // mm
-                    let width = img.width;
-                    let height = img.height;
-                    
-                    // Mantener proporción
+                    let { width, height } = img;
+
                     if (width > height) {
                         if (width > maxWidth) {
                             height = (height * maxWidth) / width;
@@ -1178,73 +1237,12 @@ class ReporteMedico {
                             height = maxHeight;
                         }
                     }
-                    
-                    // Centrar imagen
+
                     const xPos = (210 - width) / 2;
                     doc.addImage(this.archivoAdjunto, this.tipoArchivoAdjunto.split('/')[1].toUpperCase(), xPos, yPos, width, height);
+                    resolve();
                 };
-                img.src = this.archivoAdjunto;
-                
-                // Esperar a que se cargue la imagen
-                await new Promise((resolve) => {
-                    img.onload = () => {
-                        const maxWidth = 180;
-                        const maxHeight = 200;
-                        let width = img.width;
-                        let height = img.height;
-                        
-                        if (width > height) {
-                            if (width > maxWidth) {
-                                height = (height * maxWidth) / width;
-                                width = maxWidth;
-                            }
-                        } else {
-                            if (height > maxHeight) {
-                                width = (width * maxHeight) / height;
-                                height = maxHeight;
-                            }
-                        }
-                        
-                        const xPos = (210 - width) / 2;
-                        doc.addImage(this.archivoAdjunto, this.tipoArchivoAdjunto.split('/')[1].toUpperCase(), xPos, yPos, width, height);
-                        resolve();
-                    };
-                });
-            } else if (this.tipoArchivoAdjunto === 'application/pdf') {
-                // Para PDF, mostrar nota informativa
-                doc.addPage();
-                
-                const primaryColor = [15, 76, 129];
-                const accentColor = [0, 184, 212];
-                const textDark = [33, 33, 33];
-                
-                // Header
-                doc.setFillColor(...primaryColor);
-                doc.rect(0, 0, 210, 35, 'F');
-                
-                doc.setFillColor(...accentColor);
-                doc.rect(0, 32, 210, 3, 'F');
-                
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(16);
-                doc.setFont('helvetica', 'bold');
-                doc.text('ARCHIVO ADJUNTO', 15, 20);
-                
-                // Contenido
-                doc.setFontSize(11);
-                doc.setTextColor(...textDark);
-                doc.setFont('helvetica', 'normal');
-                
-                doc.text('Se adjuntó un archivo PDF a este reporte.', 15, 50);
-                doc.text('El archivo está almacenado en la base de datos y disponible', 15, 60);
-                doc.text('para descargar cuando se cargue el reporte.', 15, 70);
-                
-                // Información del archivo
-                const fileName = document.getElementById('pdfImagenInput')?.files[0]?.name || 'archivo.pdf';
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'bold');
-                doc.text('Nombre del archivo: ' + fileName, 15, 85);
-            }
+            });
         } catch (error) {
             console.error('Error al agregar archivo adjunto:', error);
         }
