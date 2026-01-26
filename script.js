@@ -29,13 +29,21 @@ class ReporteMedico {
     }
 
     init() {
-        console.log('🔍 INIT llamado');
-        this.setupEventListeners();
-        this.setReportDate();
-        this.calculateIMC();
-        console.log('🔍 Antes de checkImportedDataFromStorage()');
-        this.checkImportedDataFromStorage();
-        console.log('ReporteMedico inicializado');
+        try {
+            console.log('🔍 INIT llamado');
+            this.setupEventListeners();
+            console.log('🔍 setupEventListeners() completado');
+            this.setReportDate();
+            console.log('🔍 setReportDate() completado');
+            this.calculateIMC();
+            console.log('🔍 calculateIMC() completado');
+            console.log('🔍 Antes de checkImportedDataFromStorage()');
+            this.checkImportedDataFromStorage();
+            console.log('🔍 checkImportedDataFromStorage() completado');
+            console.log('ReporteMedico inicializado');
+        } catch (error) {
+            console.error('❌ ERROR EN INIT:', error);
+        }
     }
 
     checkImportedDataFromStorage() {
