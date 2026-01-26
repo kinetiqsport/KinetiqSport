@@ -37,7 +37,9 @@ class ReporteMedico {
     }
 
     checkImportedDataFromStorage() {
+        console.log('🔍 checkImportedDataFromStorage() llamado');
         const reportToLoad = sessionStorage.getItem('reportToLoad');
+        console.log('🔍 reportToLoad:', reportToLoad ? 'SI existe' : 'NO existe');
         if (reportToLoad) {
             try {
                 const data = JSON.parse(reportToLoad);
@@ -45,7 +47,7 @@ class ReporteMedico {
                 
                 // Cargar adjuntos si existen
                 const adjuntosToLoad = sessionStorage.getItem('adjuntosToLoad');
-                console.log('adjuntosToLoad desde sessionStorage:', adjuntosToLoad);
+                console.log('🔍 adjuntosToLoad desde sessionStorage:', adjuntosToLoad);
                 if (adjuntosToLoad) {
                     this.adjuntos = JSON.parse(adjuntosToLoad);
                     console.log('Adjuntos parseados:', this.adjuntos);
