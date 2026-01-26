@@ -953,27 +953,6 @@ class ReporteMedico {
 
             yPos = doc.lastAutoTable.finalY + 10;
 
-            // DINAMOMETRÍA
-            this.addSectionHeader(doc, 'DINAMOMETRÍA', yPos, primaryColor, accentColor);
-            yPos += 9;
-
-            // OBSERVACIONES FINALES
-            this.addSectionHeader(doc, 'OBSERVACIONES FINALES', yPos, primaryColor, accentColor);
-            yPos += 9;
-
-            const notasText = document.getElementById('notasAdicionales')?.value || 'Sin observaciones adicionales';
-            doc.autoTable({
-                startY: yPos,
-                body: [
-                    [notasText]
-                ],
-                theme: 'plain',
-                styles: { fontSize: 9, cellPadding: 4, textColor: textDark, lineColor: borderColor, lineWidth: 0.2, valign: 'top', halign: 'left' },
-                columnStyles: {
-                    0: { cellWidth: 190, fillColor: [255, 255, 255] }
-                }
-            });
-
             // FOOTER EN TODAS LAS PÁGINAS
             const pageCount = doc.getNumberOfPages();
             doc.setFontSize(7);
