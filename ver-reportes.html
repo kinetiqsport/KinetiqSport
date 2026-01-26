@@ -144,6 +144,52 @@
             gap: 10px;
         }
 
+        .adjuntos {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .adjuntos-header {
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        .adjuntos-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .adjunto-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            background: #e8f2f8;
+            color: #0f4c81;
+            border-radius: 8px;
+            border: 1px solid #d6e4f0;
+            text-decoration: none;
+            font-size: 12px;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .adjunto-chip:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        .adjunto-chip span {
+            color: #7f8c8d;
+            font-size: 11px;
+        }
+
         .open-btn {
             padding: 10px 20px;
             background: #27ae60;
@@ -371,6 +417,39 @@
                 info.appendChild(cedula);
                 info.appendChild(fecha);
 
+                const adjuntos = this.parseAdjuntos(reporte.archivo_adjunto);
+                if (adjuntos.length > 0) {
+                    const adjDiv = document.createElement('div');
+                    adjDiv.className = 'adjuntos';
+
+                    const header = document.createElement('div');
+                    header.className = 'adjuntos-header';
+                    header.textContent = `📎 Adjuntos (${adjuntos.length})`;
+                    adjDiv.appendChild(header);
+
+                    const list = document.createElement('div');
+                    list.className = 'adjuntos-list';
+
+                    adjuntos.forEach(a => {
+                        const link = document.createElement('a');
+                        link.className = 'adjunto-chip';
+                        link.href = a.data;
+                        link.download = a.nombre || 'adjunto';
+                        link.target = '_blank';
+                        link.rel = 'noopener';
+                        link.textContent = a.nombre || 'Archivo';
+
+                        const typeTag = document.createElement('span');
+                        typeTag.textContent = a.tipo?.split('/')?.[1] || '';
+                        link.appendChild(typeTag);
+
+                        list.appendChild(link);
+                    });
+
+                    adjDiv.appendChild(list);
+                    info.appendChild(adjDiv);
+                }
+
                 const actions = document.createElement('div');
                 actions.className = 'reporte-actions';
 
@@ -385,6 +464,17 @@
                 card.appendChild(actions);
 
                 return card;
+            }
+
+            parseAdjuntos(raw) {
+                if (!raw) return [];
+                try {
+                    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch (err) {
+                    console.warn('No se pudieron parsear adjuntos', err);
+                    return [];
+                }
             }
 
             abrirReporte(reporte) {
