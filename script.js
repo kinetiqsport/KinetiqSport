@@ -278,7 +278,7 @@ class ReporteMedico {
             if (saveBtn) {
                 saveBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    this.saveReport();
+                    this.saveReportToDB();
                 });
                 console.log('Botón Guardar vinculado');
             }
@@ -523,8 +523,39 @@ class ReporteMedico {
         reader.readAsText(file);
     }
 
-    saveReport() {
-        console.log('saveReport() llamado');
+    async saveReportToDB() {
+        console.log('saveReportToDB() llamado');
+        
+        const nombrePaciente = document.getElementById('nombre')?.value.trim();
+        const cedula = document.getElementById('cc')?.value.trim();
+
+        if (!nombrePaciente) {
+            this.showAlert('Por favor, ingresa un nombre', 'error');
+            return;
+        }
+
+        if (!cedula) {
+            this.showAlert('Por favor, ingresa la cédula', 'error');
+            return;
+        }
+
+        try {
+            // Mostrar indicador de carga
+            const alertMsg = this.showAlert('Guardando datos...', 'info');
+            
+            // Guardar en base de datos
+            await this.guardarEnDB();
+            
+            // Mostrar mensaje de éxito
+            this.showAlert('✓ Reporte guardado correctamente', 'success');
+        } catch (error) {
+            console.error('Error en saveReportToDB:', error);
+            this.showAlert('Error al guardar: ' + error.message, 'error');
+        }
+    }
+
+    saveReportAsJSON() {
+        console.log('saveReportAsJSON() llamado');
         const nombrePaciente = document.getElementById('nombre').value.trim();
         const apellidoPaciente = document.getElementById('apellido').value.trim();
 
@@ -548,7 +579,7 @@ class ReporteMedico {
 
             this.showAlert('✓ Reporte guardado como JSON', 'success');
         } catch (error) {
-            console.error('Error en saveReport:', error);
+            console.error('Error en saveReportAsJSON:', error);
             this.showAlert('Error al guardar: ' + error.message, 'error');
         }
     }
