@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="supabase-secrets.js"></script>
     <script>
         // Proteger página: verificar que esté logueado
@@ -348,6 +349,26 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN: ADJUNTOS (PDF/IMAGEN) -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>ADJUNTOS (OPCIONAL)</h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="pdfImagenInput">Adjuntar PDF o Imagen:</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="pdfImagenInput" accept=".pdf,.jpg,.jpeg,.png,.gif" class="form-control">
+                                <small style="color: #666;">Formatos soportados: PDF, JPG, PNG, GIF. Máx. 10MB</small>
+                            </div>
+                            <div id="adjuntoInfo" style="margin-top: 10px; padding: 10px; background: #f0f4f8; border-radius: 6px; display: none;">
+                                <p style="margin: 0; color: #333;"><strong>Archivo adjunto:</strong> <span id="adjuntoNombre"></span></p>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">Este archivo se agregará al PDF cuando descargues el reporte.</p>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
