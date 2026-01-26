@@ -29,9 +29,11 @@ class ReporteMedico {
     }
 
     init() {
+        console.log('🔍 INIT llamado');
         this.setupEventListeners();
         this.setReportDate();
         this.calculateIMC();
+        console.log('🔍 Antes de checkImportedDataFromStorage()');
         this.checkImportedDataFromStorage();
         console.log('ReporteMedico inicializado');
     }
