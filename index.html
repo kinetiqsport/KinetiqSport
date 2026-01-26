@@ -372,26 +372,7 @@
                     </div>
                 </section>
 
-                <!-- BOTONES DE ACCIÓN -->
-                <section class="action-section">
-                    <div class="button-group">
-                        <button type="reset" class="btn btn-secondary">
-                            <span>🔄</span> Limpiar
-                        </button>
-                        <button type="button" class="btn btn-info" id="loadFileBtn">
-                            <span>📥</span> Cargar Reporte
-                        </button>
-                        <button type="button" class="btn btn-success" id="saveBtn">
-                            <span>💾</span> Guardar
-                        </button>
-                        <button type="button" class="btn btn-primary" id="printBtn">
-                            <span>📄</span> Descargar PDF
-                        </button>
-                        <a href="bienvenida.html" class="btn btn-secondary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                            <span>←</span> Volver al Inicio
-                        </a>
-                    </div>
-                </section>
+
 
             </form>
         </main>
@@ -424,6 +405,31 @@
         </div>
     </div>
 
+    <!-- BARRA LATERAL FLOTANTE CON BOTONES DE ACCIÓN -->
+    <div class="floating-sidebar">
+        <button type="reset" form="reportForm" class="action-button neutral" title="Limpiar formulario">
+            <span style="font-size: 28px;">🔄</span>
+            <div class="action-button-label">Limpiar</div>
+        </button>
+        <button type="button" id="loadFileBtn" class="action-button" title="Cargar reporte anterior">
+            <span style="font-size: 28px;">📥</span>
+            <div class="action-button-label">Cargar</div>
+        </button>
+        <button type="button" id="saveBtn" class="action-button success" title="Guardar en la base de datos">
+            <span style="font-size: 28px;">💾</span>
+            <div class="action-button-label">Guardar</div>
+        </button>
+        <button type="button" id="printBtn" class="action-button info" title="Descargar PDF y guardar">
+            <span style="font-size: 28px;">📄</span>
+            <div class="action-button-label">Descargar</div>
+        </button>
+        <a href="bienvenida.html" class="action-button warning" title="Volver a la página de inicio">
+            <span style="font-size: 28px;">🏠</span>
+            <div class="action-button-label">Inicio</div>
+        </a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="supabase-config.js"></script>
     <script src="data.js"></script>
     <script src="script.js"></script>
